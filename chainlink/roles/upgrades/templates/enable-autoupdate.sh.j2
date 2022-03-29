@@ -1,0 +1,76 @@
+#!/bin/bash
+set -euo pipefail
+UU_CONF={{UU_CONF}}
+UU_START={{UU_START}}
+EMAIL_TO={{EMAIL_TO}}
+SSMTP_CONF={{SSMTP_CONF}}
+EMAIL={{EMAIL}}
+EPW={{EPW}}
+MAILSRV={{MAILSRV}}
+REBOOT=${REBOOT_AT:-02:00}
+TZ=$(cat /etc/timezone)
+
+install_packages() {
+    apt-get update && apt-get install -y unattended-upgrades ssmtp
+}
+
+configure_uu() {
+    sed -i 's~\(//\)\(\s*"\${distro_id}:\${distro_codename}-updates";\)~\2~' ${UU_CONF}
+    sed -i "s~^\(Unattended-Upgrade::Mail\s*\)\(\".*\"\);~\1\"${EMAIL_TO}\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::Mail\s*\)\(\"\"\);~\2\"${EMAIL_TO}\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::MailReport\s*\)\(\".*\"\);~\2\"only-on-error\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::Remove-Unused-Kernel-Packages\s*\)\(\".*\"\);~\2\"true\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::Remove-New-Unused-Dependencies\s*\)\(\".*\"\);~\2\"true\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::Automatic-Reboot\s*\)\(\".*\"\);~\2\"true\";~" ${UU_CONF}
+    sed -i "s~^\(Unattended-Upgrade::Automatic-Reboot-Time\s*\)\(\".*\"\);~\1\"${REBOOT}\";~" ${UU_CONF}
+    sed -i "s~\(//\)\(Unattended-Upgrade::Automatic-Reboot-Time\s*\)\(\".*\"\);~\2\"${REBOOT}\";~" ${UU_CONF}
+    cat > ${UU_START} << EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+    echo ""
+    echo "Unattended upgrades has been configured with automatic reboot at ${REBOOT} ${TZ} and email on error to ${EMAIL_TO}"
+    echo ""
+}
+
+configure_mail() {
+   cat > ${SSMTP_CONF} << EOF
+#
+# Config file for sSMTP sendmail
+#
+# The person who gets all mail for userids < 1000
+# Make this empty to disable rewriting.
+root=${EMAIL}
+
+# The place where the mail goes. The actual machine name is required no
+# MX records are consulted. Commonly mailhosts are named mail.domain.com
+mailhub=${MAILSRV}
+AuthUser=${EMAIL}
+AuthPass=${EPW}
+UseTLS=YES
+UseSTARTTLS=YES
+
+# Where will the mail seem to come from?
+#rewriteDomain=
+
+# The full hostname
+hostname=${HOSTNAME}
+
+# Are users allowed to set their own From: address?
+# YES - Allow the user to specify their own From: address
+# NO - Use the system generated From: address
+FromLineOverride=YES
+EOF
+    echo "ssmtp has been configured to send mail with user ${EMAIL}"
+    echo ""
+}
+
+if [ "${EUID}" -ne 0 ]; then
+    exec sudo -E "$BASH_SOURCE"
+fi
+
+install_packages
+configure_uu
+configure_mail

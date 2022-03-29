@@ -1,0 +1,34 @@
+---
+- name: Allow OpenSSH
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: Allow all access from other nodes to this host
+  community.general.ufw:
+    rule: allow
+    src: '{{ item }}'
+    port: '443'
+    proto: tcp
+  loop:
+    - 54.39.105.149/32
+    - 51.81.245.170/32
+    - 135.148.100.24/32
+    - 3.23.168.174/32
+    - 18.221.182.50/32
+    - 3.140.37.229/32
+    - 18.219.222.13/32
+    - 3.142.203.190/32
+    - 3.14.174.129/32
+
+
+- name: Deny all access to port 443
+  community.general.ufw:
+    rule: deny
+    port: '443'
+    proto: tcp
+
+- name: Allow everything and disable UFW
+  community.general.ufw:
+    state: enabled
+    #policy: deny #Lets confirm this

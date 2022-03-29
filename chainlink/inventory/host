@@ -1,0 +1,5 @@
+[baremetal_nodes]
+
+
+[eth_nodes]
+eth-testing.cryptomanufaktur.net  ansible_connection=ssh        ansible_user=ubuntu

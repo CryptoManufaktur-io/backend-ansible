@@ -1,0 +1,9 @@
+all:
+  hosts:
+    eth-testing.cryptomanufaktur.net:
+  children:
+    eth_nodes:
+      hosts:
+        eth-testing.cryptomanufaktur.net:
+    baremetal_nodes:
+      hosts:

@@ -1,0 +1,10 @@
+--- 
+    - name: ChainLink
+      hosts: all
+      roles:
+        #- deploynodes
+        - dockerufw
+        - performance
+        - traefik
+        - ufw
+        - upgrades

@@ -1,0 +1,69 @@
+---
+- name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+  shell: swapoff -a
+  when: "'eth_nodes' in group_names"
+  check_mode: true
+- name: Disable SWAP in fstab 
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+  when: "'eth_nodes' in group_names"
+  check_mode: true
+
+- name: "STEP 1: Get / mounted SRC device"
+  shell: mount |grep -E "\s/\s"|awk '{print $1}'
+  register: "rootdevice"
+  when: "'eth_nodes' in group_names"
+- name: "STEP 2: Get / mounted FS"
+  shell: mount |grep -E "\s/\s"|awk '{print $5}'
+  register: "rootfs"
+  when: "'eth_nodes' in group_names"
+  check_mode: true
+- debug:
+    msg: "Validated the / mount output: {{ rootdevice.stdout }}"
+  when: "'eth_nodes' in group_names"
+  check_mode: true
+
+- name: "Add mount noatime options for /"
+  mount:
+    path: "/"
+    src: "{{ rootdevice.stdout }}"
+    fstype: "{{ rootfs.stdout }}"
+    opts: "noatime"
+    state: "present"
+  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: Remount / mounted volume with mount options noatime
+  ansible.posix.mount:
+    path: /
+    state: remounted
+  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: "Checking GRUB cmdline"
+  shell: grep GRUB_CMDLINE_LINUX= /tmp/grub|grep -c "mitigations=off"
+  register: grub_cfg_grep
+  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: "Configuring GRUB cmdline"
+  replace:
+    path: '/tmp/grub'
+    regexp: '^GRUB_CMDLINE_LINUX="(([A-Za-z0-9\._=]+\s*)*)"$'
+    replace: 'GRUB_CMDLINE_LINUX="\1 mitigations=off"'
+  when: grub_cfg_grep.stdout == "0" and   "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: update-grub
+  shell: update-grub
+  when: cgroup_status.stdout == "0"  and  "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: reboot if we need it
+  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  async: 1 
+  poll: 0
+  ignore_errors: true
+  when: cgroup_status.stdout == "0" and  "'baremetal_nodes' in group_names"
+  check_mode: true
+- name: waiting for server to come back
+  local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
+  when: cgroup_status.stdout == "0" and  "'baremetal_nodes' in group_names"
+  check_mode: true

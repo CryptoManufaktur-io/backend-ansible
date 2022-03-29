@@ -5,4 +5,4 @@ SSMTP_CONF: /etc/ssmtp/ssmtp.conf
 EMAIL: user@gmail.com
 EPW: GMAILPW
 MAILSRV: smtp.gmail.com:587
-
+REBOOT: ${REBOOT_AT:-02:00}

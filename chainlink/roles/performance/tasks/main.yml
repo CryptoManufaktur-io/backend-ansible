@@ -21,7 +21,7 @@
   when: "'eth_nodes' in group_names"
   check_mode: true
 - debug:
-    msg: "Validated the / mount output: {{ rootdevice.stdout }}"
+    msg: "Validate the / mount output: {{ rootdevice.stdout }}"
   when: "'eth_nodes' in group_names"
   check_mode: true
 
@@ -32,38 +32,43 @@
     fstype: "{{ rootfs.stdout }}"
     opts: "noatime"
     state: "present"
-  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
+  when: rootdevice.stdout == "/"  and "'eth_nodes' in group_names"
   check_mode: true
 - name: Remount / mounted volume with mount options noatime
   ansible.posix.mount:
     path: /
     state: remounted
-  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
+  when: rootdevice.stdout == "/"  and "'eth_nodes' in group_names"
   check_mode: true
+
+  
 - name: "Checking GRUB cmdline"
-  shell: grep GRUB_CMDLINE_LINUX= /tmp/grub|grep -c "mitigations=off"
+  shell: grep GRUB_CMDLINE_LINUX=/etc/default/grub|grep -c "mitigations=off"
   register: grub_cfg_grep
-  when: rootdevice.stdout == "/"  and "'baremetal_nodes' in group_names"
   check_mode: true
+- debug:
+    msg: "{{ grub_cfg_grep }}"
+
 - name: "Configuring GRUB cmdline"
   replace:
-    path: '/tmp/grub'
+    path: '/etc/default/grub'
     regexp: '^GRUB_CMDLINE_LINUX="(([A-Za-z0-9\._=]+\s*)*)"$'
     replace: 'GRUB_CMDLINE_LINUX="\1 mitigations=off"'
-  when: grub_cfg_grep.stdout == "0" and   "'baremetal_nodes' in group_names"
-  check_mode: true
+  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+
 - name: update-grub
   shell: update-grub
-  when: cgroup_status.stdout == "0"  and  "'baremetal_nodes' in group_names"
-  check_mode: true
+  loop: [1] 
+  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and  (grub_cfg_grep.stdout == '0')
+
 - name: reboot if we need it
   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
   async: 1 
   poll: 0
   ignore_errors: true
-  when: cgroup_status.stdout == "0" and  "'baremetal_nodes' in group_names"
-  check_mode: true
+  when: ("'baremetal_nodes' in group_names") and  (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+
 - name: waiting for server to come back
   local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
-  when: cgroup_status.stdout == "0" and  "'baremetal_nodes' in group_names"
-  check_mode: true
+  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+  

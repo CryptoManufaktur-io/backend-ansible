@@ -3,10 +3,9 @@
   template:
     src: enable-autoupdate.sh.j2
     dest: /tmp/enable-autoupdate.sh
-    owner: root
-    group: root
-    mode: 0644
+    mode: 0744
 - name: Run  /tmp/enable-autoupdate.sh script only if /etc/ssmtp/success does not exist on the remote node
-  ansible.builtin.script: /tmp/enable-autoupdate.sh
+  ansible.builtin.shell: /tmp/enable-autoupdate.sh
+  become: true
   args:
     creates: /etc/ssmtp/success

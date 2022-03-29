@@ -58,3 +58,10 @@
     path: /tmp/traefik/.env
     regexp: '^CF_API_TOKEN='
     line: CF_API_TOKEN={{cf_api_token}}
+
+- name: Install traefik if not exisiting
+  ansible.builtin.shell: ./ethd up
+  become: true
+  args:
+    creates: /etc/traefik/success
+    chdir: /tmp/traefik 

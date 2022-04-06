@@ -2,7 +2,7 @@
     - name: ChainLink
       hosts: all
       roles:
-        #- deploynodes
+        - deploynodes
         - dockerufw
         - performance
         - traefik

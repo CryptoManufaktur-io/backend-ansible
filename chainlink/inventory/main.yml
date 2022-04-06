@@ -1,9 +1,29 @@
 all:
-  hosts:
+  hosts:  #For ungrouped hosts
     eth-testing.cryptomanufaktur.net:
+      ansible_connection: ssh   
+      ansible_user: ubuntu 
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      clone_dir: gnosis
+      # DEPLOY_COMPOSE_FILE:
+      # EC_NETWORK: 
+      # NETWORK:
+      # LH_PEER_COUNT:
+      # PRYSM_PEER_COUNT:
+      # TEKU_PEER_COUNT: 
+      # NIM_PEER_COUNT: 
+      # DOMAIN: 
+      # GRAFANA_HOST: 
+      # EC_HOST: 
+      # EC_LB: 
+      # EC_WS_HOST: 
+      # EC_WS_LB: 
+      # CC_HOST: 
+      # CC_LB: 
+      # TEKU_RAPID_SYNC: 
+      # LH_RAPID_SYNC: 
+      # NIMBUS_RAPID_SYNC: 
+      # LS_RAPID_SYNC:
   children:
-    eth_nodes:
-      hosts:
-        eth-testing.cryptomanufaktur.net:
     baremetal_nodes:
       hosts:

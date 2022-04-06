@@ -1,74 +1,118 @@
 ---
-- name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
-  shell: swapoff -a
-  when: "'eth_nodes' in group_names"
-  check_mode: true
+- name: Disable SWAP 
+  shell: sudo swapoff -a
+  become: true
+
+- name: Backup fstab
+  ansible.builtin.copy:
+    src: /etc/fstab
+    dest: /etc/fstab.bck
+    remote_src: yes
+  become: true
+
 - name: Disable SWAP in fstab 
   replace:
     path: /etc/fstab
-    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    regexp: '^([a-zA-Z=\/0-9-]+\s*(swap\s*){2}\w+\s*\w*\s*\w*)$'
     replace: '# \1'
-  when: "'eth_nodes' in group_names"
-  check_mode: true
+  become: true
 
-- name: "STEP 1: Get / mounted SRC device"
-  shell: mount |grep -E "\s/\s"|awk '{print $1}'
+
+- name: Get / rootpath  mounted Source device
+  shell: mount |grep -E "\s/\s"|awk '{print $3}'
   register: "rootdevice"
-  when: "'eth_nodes' in group_names"
-- name: "STEP 2: Get / mounted FS"
+
+- name:  Get / rootpath  mounted File system
   shell: mount |grep -E "\s/\s"|awk '{print $5}'
   register: "rootfs"
-  when: "'eth_nodes' in group_names"
   check_mode: true
 - debug:
     msg: "Validate the / mount output: {{ rootdevice.stdout }}"
-  when: "'eth_nodes' in group_names"
   check_mode: true
 
-- name: "Add mount noatime options for /"
+- name: Add mount noatime options for /
   mount:
     path: "/"
     src: "{{ rootdevice.stdout }}"
     fstype: "{{ rootfs.stdout }}"
-    opts: "noatime"
-    state: "present"
-  when: rootdevice.stdout == "/"  and "'eth_nodes' in group_names"
-  check_mode: true
-- name: Remount / mounted volume with mount options noatime
-  ansible.posix.mount:
-    path: /
+    opts: noatime
     state: remounted
-  when: rootdevice.stdout == "/"  and "'eth_nodes' in group_names"
+  when: rootdevice.stdout == "/"
   check_mode: true
 
+- name: "Search for noatime on /etc/fstab"
+  shell: grep -E '^([^#]+\s+?)(/\s+)([A-Za-z0-9]+\s*)([^#]*\s+)([^#]*?\s*)([0-9]{1}\s+)([0-9]{1})$' /etc/fstab | { grep noatime || true; }   
+  register: noatime
+  become: true
+  ignore_errors: true
+- debug:
+    msg: "{{ noatime }}"
+- name: '/etc/fstab: Set opt "noatime" for mount point /'
+  lineinfile:
+    path: /etc/fstab
+    backup: yes
+    backrefs: yes
+    regexp: '^([^#]+\s+?)(/\s+)([A-Za-z0-9]+\s*)([^#]*\s+)([^#]*?\s*)([0-9]{1}\s+)([0-9]{1})$'
+    line: '\1\2\3noatime,\4\5\6\7'
+  register: fstab
+  become: true
+  when: noatime.stdout == ""
+- debug:
+    msg: "{{ fstab }}"
+
+- name: 'If / changed, remount'
+  command: 'mount -o remount /'
+  when: fstab.changed
+  become: true
+  ignore_errors: true
+  register: mount
+- debug:
+    msg: "{{ mount }}"
+
+- name: Restore /etc/fstab in case remount fails. 
+  ansible.builtin.copy:
+    src: /etc/fstab.bck
+    dest: /etc/fstab
+    remote_src: yes
+  when: mount.stdout| default("")  != "" and mount.skipped == false
+  become: true
+  register: restore
+
+- debug:
+    msg: "{{ restore }}"
   
-- name: "Checking GRUB cmdline"
-  shell: grep GRUB_CMDLINE_LINUX=/etc/default/grub|grep -c "mitigations=off"
+- name: Checking GRUB cmdline for mitigations=off options
+  shell: grep -E '^GRUB_CMDLINE_LINUX=' /etc/default/grub| { grep  "mitigations=off" || true; }
   register: grub_cfg_grep
-  check_mode: true
+  ignore_errors: true
+  become: true
 - debug:
     msg: "{{ grub_cfg_grep }}"
 
-- name: "Configuring GRUB cmdline"
+
+- name: Configuring GRUB cmdline to add mitigations=off if need be
   replace:
     path: '/etc/default/grub'
     regexp: '^GRUB_CMDLINE_LINUX="(([A-Za-z0-9\._=]+\s*)*)"$'
     replace: 'GRUB_CMDLINE_LINUX="\1 mitigations=off"'
-  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+  when: inventory_hostname in groups["baremetal_nodes"] and (grub_cfg_grep.stdout == '')
+  become: true
 
 - name: update-grub
-  shell: update-grub
-  loop: [1] 
-  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and  (grub_cfg_grep.stdout == '0')
+  shell: update-grub 
+  when: inventory_hostname in groups["baremetal_nodes"] and  (grub_cfg_grep.stdout == '')
+  become: true
 
 - name: reboot if we need it
   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
   async: 1 
   poll: 0
   ignore_errors: true
-  when: ("'baremetal_nodes' in group_names") and  (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+  when: inventory_hostname in groups["baremetal_nodes"] and (grub_cfg_grep.stdout == '')
+  become: true
 
-- name: waiting for server to come back
-  local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
-  when: ("'baremetal_nodes' in group_names") and (grub_cfg_grep is succeeded) and (grub_cfg_grep.stdout == '0')
+# - name: waiting for server to come back
+#   local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
+#   when: ("'baremetal_nodes' in group_names")  and (grub_cfg_grep.stdout == '0')
+#   become: true
   

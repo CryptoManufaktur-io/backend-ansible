@@ -8,25 +8,25 @@
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
-    dest: /tmp/traefik
+    dest: ~/traefik
 - name: Create .env file
   ansible.builtin.copy:
-    src: /tmp/traefik/default.env
-    dest: /tmp/traefik/.env
+    src: ~/traefik/default.env
+    dest: ~/traefik/.env
     remote_src: yes
 - name: set  COMPOSE_FILE to traefik-cf.yml:traefik-shared.yml
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^COMPOSE_FILE='
     line: COMPOSE_FILE=traefik-cf.yml:traefik-shared.yml
 - name: set DOMAIN to   cryptomanufaktur.net
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^DOMAIN='
     line: DOMAIN=cryptomanufaktur.net
 - name: set DDNS_PROXY to   false
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^DDNS_PROXY='
     line: DDNS_PROXY=false
 - name: Get hostname
@@ -37,25 +37,25 @@
     var: result
 - name: set DDNS_SUBDOMAIN to   hostname
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^DDNS_SUBDOMAIN='
-    line: DDNS_SUBDOMAIN={{result.stdout}}
+    line: DDNS_SUBDOMAIN=ssh.{{result.stdout}}
   
 - name: set ACME_EMAIL
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^ACME_EMAIL='
     line: ACME_EMAIL={{acme_email}}
 
 - name: set CF_EMAIL
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^CF_EMAIL='
     line: CF_EMAIL={{cf_email}}
 
 - name: set CF_API_TOKEN
   ansible.builtin.lineinfile:
-    path: /tmp/traefik/.env
+    path: ~/traefik/.env
     regexp: '^CF_API_TOKEN='
     line: CF_API_TOKEN={{cf_api_token}}
 
@@ -64,4 +64,4 @@
   become: true
   args:
     creates: /etc/traefik/success
-    chdir: /tmp/traefik 
+    chdir: ~/traefik 

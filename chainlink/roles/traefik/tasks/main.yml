@@ -1,10 +1,4 @@
 ---
-# ---
-#   - name: Playbook
-#     hosts: localhost
-#     # become: yes
-#     # become_user: root
-#     tasks:
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
@@ -61,7 +55,6 @@
 
 - name: Install traefik if not exisiting
   ansible.builtin.shell: ./ethd up
-  become: true
   args:
     creates: /etc/traefik/success
     chdir: ~/traefik 

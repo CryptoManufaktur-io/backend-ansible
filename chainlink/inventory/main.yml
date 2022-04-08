@@ -24,6 +24,7 @@ all:
       # LH_RAPID_SYNC: 
       # NIMBUS_RAPID_SYNC: 
       # LS_RAPID_SYNC:
+      REBOOT_AT: ${REBOOT_AT:-02:00}
   children:
     baremetal_nodes:
       hosts:

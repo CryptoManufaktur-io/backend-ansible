@@ -1,10 +1,12 @@
 ---
+- name: Include variables
+  include_vars: "{{inventory_dir}}/../vars/main.yml"
+
 - name: Allow OpenSSH
   community.general.ufw:
     rule: allow
     name: OpenSSH
   become: true
-
 
 - name: Allow all access from other nodes to this host
   community.general.ufw:
@@ -14,7 +16,6 @@
     proto: '{{ item.protocol }}'
   loop: '{{ ufw.allow }}'
   become: true
-
 
 - name: deny  access from other nodes to this host
   community.general.ufw:

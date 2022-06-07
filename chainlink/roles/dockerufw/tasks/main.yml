@@ -18,6 +18,7 @@
 
       COMMIT
   become: true
+
 - name: Insert/Update /etc/ufw/before.init
   blockinfile:
     path: /etc/ufw/before.init
@@ -30,6 +31,7 @@
           iptables -A DOCKER-USER -j RETURN || true
           iptables -X ufw-user-input || true
   become: true
+
 - name: Reload UFW
   community.general.ufw:
     state: reloaded

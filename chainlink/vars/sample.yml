@@ -1,4 +1,16 @@
-test: allow
+traefik_acme_email: acme@example.com
+traefik_cf_api_token: "cloudflare_token"
+traefik_cf_email: cloudflareemail@example.com
+
+upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
+upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
+upgrades_EMAIL_TO: email@example.com
+upgrades_SSMTP_CONF: /etc/ssmtp/ssmtp.conf
+upgrades_EMAIL: email@example.com
+upgrades_EPW: SMTP_EMAIL_PASSWORD
+upgrades_MAILSRV: smtp.gmail.com:587
+upgrades_REBOOT_AT: -02:00
+
 ufw:
   allow:
     - cidr: 54.39.105.149/32
@@ -32,4 +44,3 @@ ufw:
     - cidr: 0.0.0.0/0
       port: 443
       protocol: tcp
-    

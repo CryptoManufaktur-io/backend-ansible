@@ -1,34 +1,44 @@
 ---
+- name: Include variables
+  include_vars: "{{inventory_dir}}/../vars/main.yml"
+
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
     dest: ~/traefik
+
 - name: Create .env file
   ansible.builtin.copy:
     src: ~/traefik/default.env
     dest: ~/traefik/.env
     remote_src: yes
+
 - name: set  COMPOSE_FILE to traefik-cf.yml:traefik-shared.yml
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^COMPOSE_FILE='
     line: COMPOSE_FILE=traefik-cf.yml:traefik-shared.yml
+
 - name: set DOMAIN to   cryptomanufaktur.net
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DOMAIN='
     line: DOMAIN=cryptomanufaktur.net
+
 - name: set DDNS_PROXY to   false
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DDNS_PROXY='
     line: DDNS_PROXY=false
+
 - name: Get hostname
   shell: hostname
   register: result
+
 - name: Print the var
   debug:
     var: result
+
 - name: set DDNS_SUBDOMAIN to   hostname
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
@@ -39,19 +49,19 @@
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^ACME_EMAIL='
-    line: ACME_EMAIL={{acme_email}}
+    line: ACME_EMAIL={{traefik_acme_email}}
 
 - name: set CF_EMAIL
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^CF_EMAIL='
-    line: CF_EMAIL={{cf_email}}
+    line: CF_EMAIL={{traefik_cf_email}}
 
 - name: set CF_API_TOKEN
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^CF_API_TOKEN='
-    line: CF_API_TOKEN={{cf_api_token}}
+    line: CF_API_TOKEN={{traefik_cf_api_token}}
 
 - name: Install traefik if not exisiting
   ansible.builtin.shell: ./ethd up

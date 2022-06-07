@@ -4,71 +4,83 @@
     repo: https://github.com/eth-educators/eth-docker.git
     dest: "~/{{clone_dir}}"
     version: rpc-nodes
+
 - name: Create .env file
   ansible.builtin.copy:
     src: "~/{{clone_dir}}/default.env"
     dest: "~/{{clone_dir}}/.env"
     remote_src: yes
+
 - name: set  COMPOSE_FILE 
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^COMPOSE_FILE='
     line: COMPOSE_FILE={{DEPLOY_COMPOSE_FILE}}
   when: DEPLOY_COMPOSE_FILE is defined
+
 - name: set  NETWORK 
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^NETWORK='
     line: NETWORK={{NETWORK}}
   when: NETWORK is defined
+
 - name: set  EC_NETWORK 
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^EC_NETWORK='
     line: EC_NETWORK={{EC_NETWORK}}
   when: EC_NETWORK is defined
+
 - name: set  LH_PEER_COUNT
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^LH_PEER_COUNT='
     line: LH_PEER_COUNT={{LH_PEER_COUNT}}
   when: LH_PEER_COUNT is defined
+
 - name: set  PRYSM_PEER_COUNT
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^PRYSM_PEER_COUNT='
     line: PRYSM_PEER_COUNT={{PRYSM_PEER_COUNT}}
   when: PRYSM_PEER_COUNT is defined
+
 - name: set  TEKU_PEER_COUNT
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^TEKU_PEER_COUNT='
     line: TEKU_PEER_COUNT={{TEKU_PEER_COUNT}}
   when: TEKU_PEER_COUNT is defined
+
 - name: set  NIM_PEER_COUNT
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^NIM_PEER_COUNT='
     line: NIM_PEER_COUNT={{NIM_PEER_COUNT}}
   when: NIM_PEER_COUNT is defined
+
 - name: set  DOMAIN 
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^DOMAIN='
     line: DOMAIN={{DOMAIN}}
   when: DOMAIN is defined
+
 - name: set  GRAFANA_HOST
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^GRAFANA_HOST='
     line: GRAFANA_HOST={{GRAFANA_HOST}}
   when: GRAFANA_HOST is defined
+
 - name: set  EC_HOST
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
     regexp: '^EC_HOST='
     line: EC_HOST={{EC_HOST}}
   when: EC_HOST is defined
+
 - name: set  EC_LB
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"
@@ -82,6 +94,7 @@
     regexp: '^EC_WS_HOST='
     line: EC_WS_HOST={{EC_WS_HOST}}
   when: EC_WS_HOST is defined
+
 - name: set  EC_WS_LB
   ansible.builtin.lineinfile:
     path: "~/{{clone_dir}}/.env"

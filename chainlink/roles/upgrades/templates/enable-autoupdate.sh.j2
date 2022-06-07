@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euo pipefail
-UU_CONF={{UU_CONF}}
-UU_START={{UU_START}}
-EMAIL_TO={{EMAIL_TO}}
-SSMTP_CONF={{SSMTP_CONF}}
-EMAIL={{EMAIL}}
-EPW={{EPW}}
-MAILSRV={{MAILSRV}}
-REBOOT={{REBOOT_AT}}
+UU_CONF={{upgrades_UU_CONF}}
+UU_START={{upgrades_UU_START}}
+EMAIL_TO={{upgrades_EMAIL_TO}}
+SSMTP_CONF={{upgrades_SSMTP_CONF}}
+EMAIL={{upgrades_EMAIL}}
+EPW={{upgrades_EPW}}
+MAILSRV={{upgrades_MAILSRV}}
+REBOOT={{upgrades_REBOOT_AT}}
 TZ=$(cat /etc/timezone)
 
 install_packages() {

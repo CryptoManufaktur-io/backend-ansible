@@ -1,9 +1,12 @@
+- name: Include variables
+  include_vars: "{{inventory_dir}}/../vars/main.yml"
 
 - name: Create template enable-autoupdate.sh file
   template:
     src: enable-autoupdate.sh.j2
     dest: /tmp/enable-autoupdate.sh
     mode: 0744
+
 - name: Run  /tmp/enable-autoupdate.sh script only if /etc/ssmtp/success does not exist on the remote node
   ansible.builtin.shell: /tmp/enable-autoupdate.sh
   become: true

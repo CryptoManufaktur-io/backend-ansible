@@ -1,0 +1,9 @@
+##############################################
+# generic ansible config information
+##############################################
+ansible_user: "root"
+public_ip_address: "{{ansible_host}}"
+ansible_python_interpreter: /usr/bin/python3
+
+reset_command: "ufw --force reset"
+reset_minutes: 2

@@ -1,0 +1,59 @@
+- name: Manage firewall
+  hosts: [all]
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: Upgrade all apt packages
+      apt: upgrade=dist
+
+    - name: Install ufw and other packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+        - ufw
+        - at
+
+    - name: Reset UFW
+      ufw:
+        state: reset
+
+    - name: Allow SSH port through firewall
+      ufw:
+        rule: allow
+        port: "22"
+        proto: "tcp"
+        comment: "Allow SSH"
+
+    - name: Schedule a command to reset action in {{reset_minutes}} minutes as root if not successful.
+      at:
+        command: "{{reset_command}}"
+        count: "{{reset_minutes}}"
+        units: minutes
+        unique: yes
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+        logging: 'on'
+
+    - name: Test SSH connection
+      command: "ssh -oPreferredAuthentications=publickey -i ~/.ssh/id_rsa {{ansible_user}}@{{ansible_host}} -C 'echo success'"
+      delegate_to: localhost
+      become: false
+      register: ssh_output
+      ignore_errors: yes
+      failed_when: ssh_output.failed == true
+      changed_when: false
+
+    - name: Remove reset action if successful.
+      when: ssh_output.failed == false
+      at:
+        command: "{{reset_command}}"
+        state: absent

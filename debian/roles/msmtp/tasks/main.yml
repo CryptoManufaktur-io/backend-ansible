@@ -1,0 +1,6 @@
+---
+- name: Install packages
+  apt:
+    pkg:
+    - msmtp
+    - msmtp-mta

@@ -1,0 +1,6 @@
+---
+- name: Create .vimrc for debian user
+  template:
+    src: vimrc.j2
+    dest: /home/debian/.vimrc
+    backup: yes

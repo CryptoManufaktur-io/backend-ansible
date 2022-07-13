@@ -19,16 +19,27 @@
         - ufw
         - at
 
-    - name: Reset UFW
+    - name: Deny SSH traffic
       ufw:
-        state: reset
+        rule: deny
+        name: OpenSSH
+      become: true
 
-    - name: Allow SSH port through firewall
+    - name: Allow SSH traffic from the infra bastion host
       ufw:
         rule: allow
         port: "22"
         proto: "tcp"
         comment: "Allow SSH"
+        from: "{{infra_bastion}}"
+
+    - name: Allow SSH traffic from the backup infra bastion host
+      ufw:
+        rule: allow
+        port: "22"
+        proto: "tcp"
+        comment: "Allow SSH"
+        from: "{{infra_bastion_backup}}"
 
     - name: Schedule a command to reset action in {{reset_minutes}} minutes as root if not successful.
       at:
@@ -44,7 +55,7 @@
         logging: 'on'
 
     - name: Test SSH connection
-      command: "ssh -oPreferredAuthentications=publickey -i ~/.ssh/id_rsa {{ansible_user}}@{{ansible_host}} -C 'echo success'"
+      command: "ssh -oPreferredAuthentications=publickey -i {{ ansible_ssh_private_key_file }} {{ ansible_user }}@{{ inventory_hostname }} -C 'echo success'"
       delegate_to: localhost
       become: false
       register: ssh_output

@@ -1,0 +1,10 @@
+---
+  - name: Main playbook that gets deployed to all new linux hosts.
+    hosts: all
+    gather_facts: false
+    roles:
+        - common/update_apt
+        - common/msmtp
+        - common/chrony
+        - common/docker
+        - common/vimrc

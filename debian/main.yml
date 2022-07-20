@@ -1,9 +1,0 @@
----
-  - name: Debian
-    hosts: all
-    gather_facts: false
-    roles:
-        - docker
-        - vimrc
-        - msmtp
-        - chrony

@@ -1,0 +1,10 @@
+---
+- name: Get current username
+  command: echo $HOME
+  register: whoami
+
+- name: Create .vimrc for user
+  template:
+    src: vimrc.j2
+    dest: "{{ whoami.stdout }}/.vimrc"
+    backup: yes

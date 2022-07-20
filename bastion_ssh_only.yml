@@ -1,4 +1,4 @@
-- name: Manage firewall
+- name: Only allow SSH traffic from the Bastion Host.
   hosts: [all]
   gather_facts: false
   become: true
@@ -19,18 +19,12 @@
         - ufw
         - at
 
-    - name: Deny SSH traffic
-      ufw:
-        rule: deny
-        name: OpenSSH
-      become: true
-
     - name: Allow SSH traffic from the infra bastion host
       ufw:
         rule: allow
         port: "22"
         proto: "tcp"
-        comment: "Allow SSH"
+        comment: "Allow SSH from Bastion Host"
         from: "{{infra_bastion}}"
 
     - name: Allow SSH traffic from the backup infra bastion host
@@ -38,13 +32,19 @@
         rule: allow
         port: "22"
         proto: "tcp"
-        comment: "Allow SSH"
+        comment: "Allow SSH from Backup Bastion Host"
         from: "{{infra_bastion_backup}}"
 
-    - name: Schedule a command to reset action in {{reset_minutes}} minutes as root if not successful.
+    - name: Deny All other SSH traffic
+      ufw:
+        rule: deny
+        name: OpenSSH
+        comment: "Deny all other SSH traffic"
+
+    - name: Schedule a command to reset action in {{reset_ssh_minutes}} minutes as root if not successful.
       at:
-        command: "{{reset_command}}"
-        count: "{{reset_minutes}}"
+        command: "{{reset_ssh_command}}"
+        count: "{{reset_ssh_minutes}}"
         units: minutes
         unique: yes
 
@@ -55,7 +55,7 @@
         logging: 'on'
 
     - name: Test SSH connection
-      command: "ssh -oPreferredAuthentications=publickey -i {{ ansible_ssh_private_key_file }} {{ ansible_user }}@{{ inventory_hostname }} -C 'echo success'"
+      command: ssh -o ProxyCommand="bash -c 'cloudflared access ssh-gen --hostname infra-bastion.cryptomanufaktur.net; ssh -W %h:%p {{ bastion_username }}@cfpipe-infra-bastion.cryptomanufaktur.net'" -oPreferredAuthentications=publickey -i {{ ansible_ssh_private_key_file }} {{ ansible_ssh_user }}@{{ inventory_hostname }} -C "echo success"
       delegate_to: localhost
       become: false
       register: ssh_output
@@ -66,5 +66,5 @@
     - name: Remove reset action if successful.
       when: ssh_output.failed == false
       at:
-        command: "{{reset_command}}"
+        command: "{{reset_ssh_command}}"
         state: absent

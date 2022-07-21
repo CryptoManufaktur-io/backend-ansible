@@ -1,0 +1,12 @@
+---
+- name: Install packages
+  apt:
+    pkg:
+    - chrony
+  become: true
+
+# - name: Create config file
+#   template:
+#     src: chrony.conf.j2
+#     dest: /etc/chrony.conf
+#     backup: yes

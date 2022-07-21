@@ -1,0 +1,70 @@
+- name: Only allow SSH traffic from the Bastion Host.
+  hosts: [all]
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: Upgrade all apt packages
+      apt: upgrade=dist
+
+    - name: Install ufw and other packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+        - ufw
+        - at
+
+    - name: Allow SSH traffic from the infra bastion host
+      ufw:
+        rule: allow
+        port: "22"
+        proto: "tcp"
+        comment: "Allow SSH from Bastion Host"
+        from: "{{infra_bastion}}"
+
+    - name: Allow SSH traffic from the backup infra bastion host
+      ufw:
+        rule: allow
+        port: "22"
+        proto: "tcp"
+        comment: "Allow SSH from Backup Bastion Host"
+        from: "{{infra_bastion_backup}}"
+
+    - name: Deny All other SSH traffic
+      ufw:
+        rule: deny
+        name: OpenSSH
+        comment: "Deny all other SSH traffic"
+
+    - name: Schedule a command to reset action in {{reset_ssh_minutes}} minutes as root if not successful.
+      at:
+        command: "{{reset_ssh_command}}"
+        count: "{{reset_ssh_minutes}}"
+        units: minutes
+        unique: yes
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+        logging: 'on'
+
+    - name: Test SSH connection
+      command: ssh -o ProxyCommand="bash -c 'cloudflared access ssh-gen --hostname infra-bastion.cryptomanufaktur.net; ssh -W %h:%p {{ bastion_username }}@cfpipe-infra-bastion.cryptomanufaktur.net'" -oPreferredAuthentications=publickey -i {{ ansible_ssh_private_key_file }} {{ ansible_ssh_user }}@{{ inventory_hostname }} -C "echo success"
+      delegate_to: localhost
+      become: false
+      register: ssh_output
+      ignore_errors: yes
+      failed_when: ssh_output.failed == true
+      changed_when: false
+
+    - name: Remove reset action if successful.
+      when: ssh_output.failed == false
+      at:
+        command: "{{reset_ssh_command}}"
+        state: absent

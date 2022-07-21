@@ -1,0 +1,65 @@
+---
+- name: Download Prometheus
+  ansible.builtin.get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v2.36.2/prometheus-2.36.2.linux-amd64.tar.gz
+    dest: ~/prometheus.tar.gz
+  become: true
+
+- name: Extract
+  ansible.builtin.unarchive:
+    src: ~/prometheus.tar.gz
+    dest: ~/
+    remote_src: yes
+  become: true
+
+- name: Copy binary
+  ansible.builtin.copy:
+    src: ~/prometheus-2.36.2.linux-amd64/prometheus
+    dest: /usr/bin/prometheus
+    remote_src: yes
+  become: true
+
+- name: Make it executable
+  file: dest=/usr/bin/prometheus mode=a+x
+  become: true
+
+- name: Create service unit
+  template:
+    src: service_unit.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Create config directory
+  file:
+    path: /etc/prometheus
+    state: directory
+  become: true
+
+- name: Create config file
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Start prometheus
+  become: true
+  systemd:
+    daemon_reload: true
+    name: prometheus
+    state: started
+    enabled: true
+  become: true
+
+# - name: Allow traffic to Prometheus as data source for Grafana
+#   become: true
+#   ufw:
+#     rule: allow
+#     port: "9090"
+#     proto: "tcp"
+#     comment: "Allow access to Prometheus server"

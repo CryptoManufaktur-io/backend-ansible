@@ -1,0 +1,4 @@
+all:
+  baremetal:
+    debiantest.cryptomanufaktur.net:
+      REBOOT_AT: ${REBOOT_AT:-02:00}

@@ -3,6 +3,7 @@
   apt:
     pkg:
     - chrony
+  become: true
 
 # - name: Create config file
 #   template:

@@ -8,5 +8,5 @@
         - common/chrony
         - common/docker
         - common/vimrc
-        - common/prometheus
-        - common/node_exporter
+        # - common/prometheus
+        # - common/node_exporter

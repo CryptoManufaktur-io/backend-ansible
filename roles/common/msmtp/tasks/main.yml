@@ -4,3 +4,4 @@
     pkg:
     - msmtp
     - msmtp-mta
+  become: true

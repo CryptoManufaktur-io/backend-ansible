@@ -1,5 +1,5 @@
 ---
-- name: Disable SWAP 
+- name: Disable SWAP
   shell: sudo swapoff -a
   become: true
 
@@ -10,7 +10,7 @@
     remote_src: yes
   become: true
 
-- name: Disable SWAP in fstab 
+- name: Disable SWAP in fstab
   replace:
     path: /etc/fstab
     regexp: '^([a-zA-Z=\/0-9-]+\s*(swap\s*){2}\w+\s*\w*\s*\w*)$'
@@ -41,7 +41,7 @@
   check_mode: true
 
 - name: "Search for noatime on /etc/fstab"
-  shell: grep -E '^([^#]+\s+?)(/\s+)([A-Za-z0-9]+\s*)([^#]*\s+)([^#]*?\s*)([0-9]{1}\s+)([0-9]{1})$' /etc/fstab | { grep noatime || true; }   
+  shell: grep -E '^([^#]+\s+?)(/\s+)([A-Za-z0-9]+\s*)([^#]*\s+)([^#]*?\s*)([0-9]{1}\s+)([0-9]{1})$' /etc/fstab | { grep noatime || true; }
   register: noatime
   become: true
   ignore_errors: true
@@ -69,7 +69,7 @@
 - debug:
     msg: "{{ mount }}"
 
-- name: Restore /etc/fstab in case remount fails. 
+- name: Restore /etc/fstab in case remount fails.
   ansible.builtin.copy:
     src: /etc/fstab.bck
     dest: /etc/fstab
@@ -80,7 +80,7 @@
 
 - debug:
     msg: "{{ restore }}"
-  
+
 - name: Checking GRUB cmdline for mitigations=off options
   shell: grep -E '^GRUB_CMDLINE_LINUX=' /etc/default/grub| { grep  "mitigations=off" || true; }
   register: grub_cfg_grep
@@ -99,13 +99,13 @@
   become: true
 
 - name: update-grub
-  shell: update-grub 
+  shell: update-grub
   when: inventory_hostname in groups["baremetal_nodes"] and  (grub_cfg_grep.stdout == '')
   become: true
 
 - name: reboot if we need it
   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
-  async: 1 
+  async: 1
   poll: 0
   ignore_errors: true
   when: inventory_hostname in groups["baremetal_nodes"] and (grub_cfg_grep.stdout == '')
@@ -115,4 +115,4 @@
 #   local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
 #   when: ("'baremetal_nodes' in group_names")  and (grub_cfg_grep.stdout == '0')
 #   become: true
-  
+

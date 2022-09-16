@@ -6,16 +6,16 @@ EMAIL_TO={{upgrades_EMAIL_TO}}
 SSMTP_CONF={{upgrades_SSMTP_CONF}}
 EMAIL={{upgrades_EMAIL}}
 EPW={{upgrades_EPW}}
-MAILSRV={{upgrades_MAILSRV}}
+MAILSRV={{upgrades_MAILSRV}}:{{upgrades_MAILSRV_PORT}}
 REBOOT={{upgrades_REBOOT_AT}}
 TZ=$(cat /etc/timezone)
 
 install_packages() {
-    apt-get update && apt-get install -y unattended-upgrades ssmtp
+    apt-get update && apt-get install -y unattended-upgrades
 }
 
 configure_uu() {
-    sed -i 's~\(//\)\(\s*"\${distro_id}:\${distro_codename}-updates";\)~\2~' ${UU_CONF}
+    sed -i 's~\(//\)\(\s*"origin=Debian,codename=\${distro_codename}-updates";\)~\2~' ${UU_CONF}
     sed -i "s~^\(Unattended-Upgrade::Mail\s*\)\(\".*\"\);~\1\"${EMAIL_TO}\";~" ${UU_CONF}
     sed -i "s~\(//\)\(Unattended-Upgrade::Mail\s*\)\(\"\"\);~\2\"${EMAIL_TO}\";~" ${UU_CONF}
     sed -i "s~\(//\)\(Unattended-Upgrade::MailReport\s*\)\(\".*\"\);~\2\"only-on-error\";~" ${UU_CONF}
@@ -35,42 +35,9 @@ EOF
     echo ""
 }
 
-configure_mail() {
-   cat > ${SSMTP_CONF} << EOF
-#
-# Config file for sSMTP sendmail
-#
-# The person who gets all mail for userids < 1000
-# Make this empty to disable rewriting.
-root=${EMAIL}
-
-# The place where the mail goes. The actual machine name is required no
-# MX records are consulted. Commonly mailhosts are named mail.domain.com
-mailhub=${MAILSRV}
-AuthUser=${EMAIL}
-AuthPass=${EPW}
-UseTLS=YES
-UseSTARTTLS=YES
-
-# Where will the mail seem to come from?
-#rewriteDomain=
-
-# The full hostname
-hostname=${HOSTNAME}
-
-# Are users allowed to set their own From: address?
-# YES - Allow the user to specify their own From: address
-# NO - Use the system generated From: address
-FromLineOverride=YES
-EOF
-    echo "ssmtp has been configured to send mail with user ${EMAIL}"
-    echo ""
-}
-
 if [ "${EUID}" -ne 0 ]; then
     exec sudo -E "$BASH_SOURCE"
 fi
 
 install_packages
 configure_uu
-configure_mail

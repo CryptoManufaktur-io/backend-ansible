@@ -1,0 +1,11 @@
+account default
+host {{ upgrades_MAILSRV }}
+port {{ upgrades_MAILSRV_PORT }}
+from {{ upgrades_EMAIL }}
+tls on
+tls_starttls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+auth on
+user {{ upgrades_EMAIL }}
+password {{ upgrades_EPW }}
+logfile ~/.msmtp.log

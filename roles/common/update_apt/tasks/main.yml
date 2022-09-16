@@ -3,3 +3,8 @@
   apt:
     update_cache: yes
   become: true
+- name: Install htop
+  apt:
+    pkg:
+    - htop
+  become: true

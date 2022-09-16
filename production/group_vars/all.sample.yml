@@ -1,0 +1,31 @@
+# Variables that apply to all production hosts.
+traefik_acme_email: user@example.com
+traefik_cf_api_token: ""
+traefik_cf_email: user@example.com
+
+upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
+upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
+upgrades_EMAIL_TO: user@example.com
+upgrades_SSMTP_CONF: /etc/ssmtp/ssmtp.conf
+upgrades_EMAIL: user@example.com
+upgrades_EPW: password
+upgrades_MAILSRV: smtp.gmail.com:587
+upgrades_REBOOT_AT: -02:00
+
+infra_bastion: 192.168.1.10
+infra_bastion_backup: 192.168.1.11
+infra_bastion_hostname: bastion.example.com
+infra_bastion_backup_hostname: bastion-backup.example.com
+bastion_username: jdoe
+ssh_keys_path: ~/.ssh
+
+ufw:
+  allow:
+    - cidr: 192.168.1.100/32
+      port: 443
+      protocol: tcp
+      description: Allow port 443 access from known server
+  deny:
+    - cidr: 0.0.0.0/0
+      port: 443
+      protocol: tcp

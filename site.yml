@@ -3,10 +3,14 @@
     hosts: all
     gather_facts: false
     roles:
+        - common/bastion_ssh_only
         - common/update_apt
         - common/msmtp
         - common/chrony
         - common/docker
         - common/vimrc
-        # - common/prometheus
-        # - common/node_exporter
+        - common/traefik
+        - common/dockerufw
+        - common/ufw
+        - common/upgrades
+        - common/performance

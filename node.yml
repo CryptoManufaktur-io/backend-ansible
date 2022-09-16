@@ -1,0 +1,6 @@
+---
+    - name: Deploy RPC Nodes using ETH docker.
+      hosts: all
+      gather_facts: false
+      roles:
+        - eth/deploynodes

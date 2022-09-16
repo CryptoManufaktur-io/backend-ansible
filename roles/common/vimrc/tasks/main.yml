@@ -3,6 +3,13 @@
   command: echo $HOME
   register: whoami
 
+- name: Install VIM
+  apt:
+    update_cache: yes
+    pkg:
+    - vim
+  become: true
+
 - name: Create .vimrc for user
   template:
     src: vimrc.j2

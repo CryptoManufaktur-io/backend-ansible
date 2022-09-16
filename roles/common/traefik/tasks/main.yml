@@ -1,11 +1,13 @@
 ---
-- name: Include variables
-  include_vars: "{{inventory_dir}}/../vars/main.yml"
+# - name: Include variables
+#   include_vars: "{{inventory_dir}}/group_vars/main.yml"
 
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
     dest: ~/traefik
+    single_branch: no
+    version: main
 
 - name: Create .env file
   ansible.builtin.copy:
@@ -13,11 +15,11 @@
     dest: ~/traefik/.env
     remote_src: yes
 
-- name: set  COMPOSE_FILE to traefik-cf.yml:traefik-shared.yml
+- name: set  COMPOSE_FILE to traefik-cf.yml
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^COMPOSE_FILE='
-    line: COMPOSE_FILE=traefik-cf.yml:traefik-shared.yml
+    line: COMPOSE_FILE=traefik-cf.yml
 
 - name: set DOMAIN to   cryptomanufaktur.net
   ansible.builtin.lineinfile:
@@ -43,8 +45,8 @@
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DDNS_SUBDOMAIN='
-    line: DDNS_SUBDOMAIN=ssh.{{result.stdout}}
-  
+    line: DDNS_SUBDOMAIN={{result.stdout}}
+
 - name: set ACME_EMAIL
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
@@ -67,4 +69,4 @@
   ansible.builtin.shell: ./ethd up
   args:
     creates: /etc/traefik/success
-    chdir: ~/traefik 
+    chdir: ~/traefik

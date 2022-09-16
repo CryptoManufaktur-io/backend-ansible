@@ -1,10 +1,5 @@
-##############################################
-# generic ansible config information
-##############################################
+# Variables that apply to all hosts.
 ansible_python_interpreter: /usr/bin/python3
 
 reset_ssh_command: "ufw insert 1 allow ssh comment 'Failsafe added after connection through bastion host failed'"
-reset_ssh_minutes: 2
-
-infra_bastion: 18.221.164.148
-infra_bastion_backup: 15.223.3.129
+reset_ssh_minutes: 5

@@ -14,16 +14,8 @@
     state: directory
   become: true
 
-- name: Download docker gpg key
-  get_url:
-    url: https://download.docker.com/linux/debian/gpg
-    dest: ~/docker_gpg
-  become: true
-
-- name: Dearmor
-  command:  gpg --dearmor < ~/docker_gpg > -o /etc/apt/keyrings/docker.gpg
-  changed_when: false
-  no_log: true
+- name: Add the GPG key for Docker
+  shell: 'curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
   become: true
 
 - name: Get architecture
@@ -36,8 +28,8 @@
 
 - name: Add docker repo
   apt_repository:
-  repo: "deb [arch={{ env_arch.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ env_codename.stdout }} stable"
-  state: present
+    repo: "deb [arch={{ env_arch.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ env_codename.stdout }} stable"
+    state: present
   become: true
 
 - name: Update apt cache again with the new repo
@@ -69,6 +61,5 @@
 - name: Add docker compose alias for debian user
   lineinfile:
     path: /home/debian/.profile
-    line: alias docker-compose=\"docker compose\"
+    line: "alias docker-compose=\"docker compose\""
     create: yes
-  become: true

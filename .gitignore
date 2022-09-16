@@ -1,3 +1,5 @@
 chainlink/vars/main.yml
 production/group_vars/main.yml
+production/group_vars/all.yml
+production/inventory.yml
 .DS_Store

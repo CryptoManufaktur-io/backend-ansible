@@ -1,7 +1,11 @@
 ---
-- name: Install packages
+- name: Install msmtp-mta
   apt:
     pkg:
-    - msmtp
     - msmtp-mta
+  become: true
+- name: Create /etc/msmtprc
+  template:
+    src: .msmtprc.j2
+    dest: /etc/msmtprc
   become: true

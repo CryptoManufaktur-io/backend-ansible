@@ -1,12 +1,6 @@
 ---
-- name: Include variables
-  include_vars: "{{inventory_dir}}/../vars/main.yml"
-
-- name: Allow OpenSSH
-  community.general.ufw:
-    rule: allow
-    name: OpenSSH
-  become: true
+# - name: Include variables
+#   include_vars: "{{inventory_dir}}/group_vars/main.yml"
 
 - name: Allow all access from other nodes to this host
   community.general.ufw:
@@ -14,6 +8,7 @@
     src: '{{ item.cidr }}'
     port: '{{ item.port }}'
     proto: '{{ item.protocol }}'
+    comment: '{{ item.description }}'
   loop: '{{ ufw.allow }}'
   become: true
 
@@ -23,6 +18,7 @@
     src: '{{ item.cidr }}'
     port: '{{ item.port }}'
     proto: '{{ item.protocol }}'
+    comment: "Deny access from specific hosts"
   loop: '{{ ufw.deny }}'
   become: true
 
@@ -33,7 +29,7 @@
     proto: tcp
   become: true
 
-- name: Allow everything and disable UFW
+- name: Allow everything and enable UFW
   community.general.ufw:
     state: enabled
   become: true

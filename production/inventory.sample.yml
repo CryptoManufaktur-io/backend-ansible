@@ -1,0 +1,53 @@
+all:
+  hosts:  #For ungrouped hosts
+    # eth-testing.example.com:
+      # ansible_connection: ssh
+      # ansible_user: ubuntu
+      # ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      # clone_dir: gnosis
+      # DEPLOY_COMPOSE_FILE:
+      # EL_NETWORK:
+      # NETWORK:
+      # LH_PEER_COUNT:
+      # PRYSM_PEER_COUNT:
+      # TEKU_PEER_COUNT:
+      # NIM_PEER_COUNT:
+      # DOMAIN:
+      # GRAFANA_HOST:
+      # EL_HOST:
+      # EL_LB:
+      # EL_WS_HOST:
+      # EL_WS_LB:
+      # CL_HOST:
+      # CL_LB:
+      # TEKU_RAPID_SYNC:
+      # LH_RAPID_SYNC:
+      # NIMBUS_RAPID_SYNC:
+      # LS_RAPID_SYNC:
+      # REBOOT_AT: ${REBOOT_AT:-02:00}
+  children:
+    baremetal_nodes:
+      hosts:
+        another-test.example.com:
+          ansible_host: 192.168.1.21
+          ansible_ssh_extra_args: "-o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
+          ansible_user: debian
+          ansible_ssh_private_key_file: "{{ ssh_keys_path }}/cmf-east-2.pem"
+          upgrades_REBOOT_AT: "01:00"
+
+          # clone_dir: gnosis
+          # DEPLOY_COMPOSE_FILE: lh-consensus.yml:nm.yml:grafana.yml:prometheus-traefik.yml:ext-network.yml
+          # FEE_RECIPIENT: ""
+          # NETWORK: gnosis
+          # EL_NETWORK: xdai
+          # DOMAIN: example.com
+          # GRAFANA_HOST: grafana-gnosis-a
+          # PROM_HOST: prom-gnosis-a
+          # EL_HOST: ec
+          # EL_LB: ec-lb
+          # EL_WS_HOST: ecws
+          # EL_WS_LB: ecws-lb
+          # CL_HOST: gnosis-a
+          # CL_LB: gnosis-lb
+          # SSV_P2P_PORT: 13000
+          # SSV_P2P_PORT_UDP: 12000

@@ -8,3 +8,9 @@
     pkg:
     - htop
   become: true
+
+- name: Install bc
+  apt:
+    pkg:
+    - bc
+  become: true

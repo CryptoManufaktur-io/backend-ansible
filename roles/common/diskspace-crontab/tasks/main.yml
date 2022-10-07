@@ -1,0 +1,12 @@
+- name: Set MAILTO
+  ansible.builtin.cron:
+    name: MAILTO
+    env: yes
+    job: engineering@cryptomanufaktur.net
+
+- name: Create diskspace task
+  ansible.builtin.cron:
+    name: "check space"
+    minute: "0"
+    hour: "12"
+    job: "/home/{{ ansible_user }}/traefik/auto-prune.sh --dry-run"

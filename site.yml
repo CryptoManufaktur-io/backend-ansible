@@ -7,7 +7,9 @@
         - common/update_apt
         - common/msmtp
         - common/chrony
-        - common/docker
+        - role: common/docker
+          tags:
+            - docker
         - common/vimrc
         - common/traefik
         - common/dockerufw

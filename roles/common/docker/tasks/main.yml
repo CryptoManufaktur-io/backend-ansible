@@ -14,9 +14,19 @@
     state: directory
   become: true
 
-- name: Add the GPG key for Docker
-  shell: 'curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
+- name: Remove the GPG key for Docker
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.gpg
+    state: absent
   become: true
+
+- name: Add the GPG key for Docker
+  shell: 'curl -fsSL -m10 https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /etc/apt/keyrings/docker.gpg'
+  args:
+    warn: false
+  become: true
+  async: 10
+  poll: 10
 
 - name: Get architecture
   command: dpkg --print-architecture

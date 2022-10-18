@@ -15,4 +15,7 @@
         - common/dockerufw
         - common/ufw
         - common/upgrades
+        - role: common/diskspace-crontab
+          tags:
+            - diskspace-crontab
         - common/performance

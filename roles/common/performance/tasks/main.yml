@@ -20,7 +20,7 @@
 
 - name: Get / rootpath  mounted Source device
   shell: mount |grep -E "\s/\s"|awk '{print $3}'
-  register: "rootdevice"
+  register: rootdevice
 
 - name:  Get / rootpath  mounted File system
   shell: mount |grep -E "\s/\s"|awk '{print $5}'

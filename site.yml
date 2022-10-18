@@ -1,5 +1,5 @@
 ---
-  - name: Main playbook that gets deployed to all new linux hosts.
+  - name: Main playbook that gets deployed to all new linux bare metal.
     hosts: all
     gather_facts: false
     roles:

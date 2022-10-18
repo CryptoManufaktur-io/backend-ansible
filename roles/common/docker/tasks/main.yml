@@ -51,15 +51,23 @@
     upgrade: dist
   become: true
 
-- name: Add debian user to docker group
+- name: Get current home
+  command: echo $HOME
+  register: user_home
+
+- name: Get current username
+  command: whoami
+  register: whoami
+
+- name: Add current user to docker group
   user:
-    name: debian
+    name: "{{ whoami.stdout }}"
     groups: docker
     append: yes
   become: true
 
-- name: Add docker compose alias for debian user
+- name: Add docker compose alias for current user
   lineinfile:
-    path: /home/debian/.profile
+    path: "{{ user_home.stdout }}/.profile"
     line: "alias docker-compose=\"docker compose\""
     create: yes

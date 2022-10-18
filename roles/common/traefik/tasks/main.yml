@@ -6,7 +6,6 @@
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
     dest: ~/traefik
-    single_branch: no
     version: main
 
 - name: Create .env file

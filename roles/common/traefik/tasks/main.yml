@@ -6,7 +6,6 @@
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
     dest: ~/traefik
-    single_branch: no
     version: main
 
 - name: Create .env file
@@ -15,23 +14,31 @@
     dest: ~/traefik/.env
     remote_src: yes
 
-- name: set  COMPOSE_FILE to traefik-cf.yml
+- name: set COMPOSE_FILE to traefik-cf.yml
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^COMPOSE_FILE='
     line: COMPOSE_FILE=traefik-cf.yml
 
-- name: set DOMAIN to   cryptomanufaktur.net
+- name: set DOMAIN to cryptomanufaktur.net
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DOMAIN='
     line: DOMAIN=cryptomanufaktur.net
 
-- name: set DDNS_PROXY to   false
+- name: set DDNS_PROXY to false
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DDNS_PROXY='
     line: DDNS_PROXY=false
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname_short }}"
+
+- name: Print hostname
+  debug:
+    msg: "Hostname set to {{ inventory_hostname_short }}"
 
 - name: Get hostname
   shell: hostname
@@ -41,7 +48,7 @@
   debug:
     var: result
 
-- name: set DDNS_SUBDOMAIN to   hostname
+- name: set DDNS_SUBDOMAIN to hostname
   ansible.builtin.lineinfile:
     path: ~/traefik/.env
     regexp: '^DDNS_SUBDOMAIN='

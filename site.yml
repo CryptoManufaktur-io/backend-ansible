@@ -1,5 +1,5 @@
 ---
-  - name: Main playbook that gets deployed to all new linux hosts.
+  - name: Main playbook that gets deployed to all new linux bare metal.
     hosts: all
     gather_facts: false
     roles:
@@ -7,10 +7,15 @@
         - common/update_apt
         - common/msmtp
         - common/chrony
-        - common/docker
+        - role: common/docker
+          tags:
+            - docker
         - common/vimrc
         - common/traefik
         - common/dockerufw
         - common/ufw
         - common/upgrades
+        - role: common/diskspace-crontab
+          tags:
+            - diskspace-crontab
         - common/performance

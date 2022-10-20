@@ -14,9 +14,19 @@
     state: directory
   become: true
 
-- name: Add the GPG key for Docker
-  shell: 'curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
+- name: Remove the GPG key for Docker
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.gpg
+    state: absent
   become: true
+
+- name: Add the GPG key for Docker
+  shell: 'curl -fsSL -m10 https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /etc/apt/keyrings/docker.gpg'
+  args:
+    warn: false
+  become: true
+  async: 10
+  poll: 10
 
 - name: Get architecture
   command: dpkg --print-architecture
@@ -51,15 +61,23 @@
     upgrade: dist
   become: true
 
-- name: Add debian user to docker group
+- name: Get current home
+  command: echo $HOME
+  register: user_home
+
+- name: Get current username
+  command: whoami
+  register: whoami
+
+- name: Add current user to docker group
   user:
-    name: debian
+    name: "{{ whoami.stdout }}"
     groups: docker
     append: yes
   become: true
 
-- name: Add docker compose alias for debian user
+- name: Add docker compose alias for current user
   lineinfile:
-    path: /home/debian/.profile
+    path: "{{ user_home.stdout }}/.profile"
     line: "alias docker-compose=\"docker compose\""
     create: yes

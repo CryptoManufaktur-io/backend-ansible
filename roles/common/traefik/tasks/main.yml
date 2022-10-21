@@ -35,6 +35,7 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname_short }}"
+  become: true
 
 - name: Print hostname
   debug:

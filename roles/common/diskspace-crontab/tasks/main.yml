@@ -2,7 +2,7 @@
   ansible.builtin.cron:
     name: MAILTO
     env: yes
-    job: engineering@cryptomanufaktur.net
+    job: "{{ upgrades_EMAIL_TO }}"
 
 - name: Create diskspace task
   ansible.builtin.cron:

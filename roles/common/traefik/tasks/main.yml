@@ -2,11 +2,23 @@
 # - name: Include variables
 #   include_vars: "{{inventory_dir}}/group_vars/main.yml"
 
+- name: Install git and dbus
+  apt:
+    pkg:
+    - git
+    - dbus
+  become: true
+
+- name: Start service dbus, if not started
+  ansible.builtin.service:
+    name: dbus.socket
+    state: started
+  become: true
+
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/eth-educators/eth-docker.git
     dest: ~/traefik
-    single_branch: no
     version: main
 
 - name: Create .env file
@@ -36,6 +48,7 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname_short }}"
+  become: true
 
 - name: Print hostname
   debug:

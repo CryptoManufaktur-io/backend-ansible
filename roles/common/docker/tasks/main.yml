@@ -22,8 +22,6 @@
 
 - name: Add the GPG key for Docker
   shell: 'curl -fsSL -m10 https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /etc/apt/keyrings/docker.gpg'
-  args:
-    warn: false
   become: true
   async: 10
   poll: 10

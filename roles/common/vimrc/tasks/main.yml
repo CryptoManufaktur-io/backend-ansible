@@ -15,3 +15,10 @@
     src: vimrc.j2
     dest: "{{ whoami.stdout }}/.vimrc"
     backup: yes
+
+- name: Create .vimrc for root
+  template:
+    src: vimrc.j2
+    dest: "/root/.vimrc"
+    backup: yes
+  become: true

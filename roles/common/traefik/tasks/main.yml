@@ -86,7 +86,7 @@
     regexp: '^CF_API_TOKEN='
     line: CF_API_TOKEN={{traefik_cf_api_token}}
 
-- name: Install traefik if not exisiting
+- name: Install traefik if not existing
   ansible.builtin.shell: ./ethd up
   args:
     creates: /etc/traefik/success

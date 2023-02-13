@@ -16,7 +16,7 @@ install_packages() {
 
 configure_uu() {
     sed -i 's~\(//\)\(\s*"origin=Debian,codename=\${distro_codename}-updates";\)~\2~' ${UU_CONF}
-    sed -i '~\(//\)\(\s*"origin=Debian,codename=\${distro_codename}-security,label=Debian-Security";\)~a         "origin=Docker";~' ${UU_CONF}
+    sed -i '/.*Archive or Suite.*/i\ \ \ \ \ \ \ \ "origin=Docker";' ${UU_CONF}
     sed -i "s~^\(Unattended-Upgrade::Mail\s*\)\(\".*\"\);~\1\"${EMAIL_TO}\";~" ${UU_CONF}
     sed -i "s~\(//\)\(Unattended-Upgrade::Mail\s*\)\(\"\"\);~\2\"${EMAIL_TO}\";~" ${UU_CONF}
     sed -i "s~\(//\)\(Unattended-Upgrade::MailReport\s*\)\(\".*\"\);~\2\"only-on-error\";~" ${UU_CONF}

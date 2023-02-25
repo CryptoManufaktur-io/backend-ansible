@@ -93,7 +93,7 @@
 - name: Configuring GRUB cmdline to add mitigations=off if need be
   replace:
     path: '/etc/default/grub'
-    regexp: '^GRUB_CMDLINE_LINUX="(([A-Za-z0-9\._=]+\s*)*)"$'
+    regexp: '^GRUB_CMDLINE_LINUX="(.*)"$'
     replace: 'GRUB_CMDLINE_LINUX="\1 mitigations=off"'
   when: inventory_hostname in groups["baremetal_nodes"] and (grub_cfg_grep.stdout == '')
   become: true

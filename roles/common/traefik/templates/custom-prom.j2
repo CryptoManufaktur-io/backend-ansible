@@ -1,0 +1,11 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: {{ prom_cluster }}
+    environment: {{ prom_environment }}
+
+remote_write:
+  - url: {{ prom_remote_write_url }}
+    headers:
+      {{ prom_remote_write_headers | to_nice_yaml | indent(6) }}

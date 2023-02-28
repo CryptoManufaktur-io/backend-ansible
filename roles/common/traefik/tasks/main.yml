@@ -16,24 +16,24 @@
 - name: clone repo
   ansible.builtin.git:
     repo: https://github.com/CryptoManufaktur-io/base-docker-environment.git
-    dest: ~/base-docker-environment
+    dest: ~/traefik
     version: main
 
 - name: Create .env file
   ansible.builtin.copy:
-    src: ~/base-docker-environment/default.env
-    dest: ~/base-docker-environment/.env
+    src: ~/traefik/default.env
+    dest: ~/traefik/.env
     remote_src: yes
 
 - name: set DOMAIN to cryptomanufaktur.net
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^DOMAIN='
     line: DOMAIN=cryptomanufaktur.net
 
 - name: set DDNS_PROXY to false
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^DDNS_PROXY='
     line: DDNS_PROXY=false
 
@@ -56,40 +56,40 @@
 
 - name: set DDNS_SUBDOMAIN to hostname
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^DDNS_SUBDOMAIN='
     line: DDNS_SUBDOMAIN={{result.stdout}}
 
 - name: set ACME_EMAIL
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^ACME_EMAIL='
     line: ACME_EMAIL={{traefik_acme_email}}
 
 - name: set CF_EMAIL
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^CF_EMAIL='
     line: CF_EMAIL={{traefik_cf_email}}
 
 - name: set CF_API_TOKEN
   ansible.builtin.lineinfile:
-    path: ~/base-docker-environment/.env
+    path: ~/traefik/.env
     regexp: '^CF_API_TOKEN='
     line: CF_API_TOKEN={{traefik_cf_api_token}}
 
 - name: Create custom-prom.yml
   template:
     src: custom-prom.j2
-    dest: ~/base-docker-environment/prometheus/custom-prom.yml
+    dest: ~/traefik/prometheus/custom-prom.yml
 
 - name: Build project
   ansible.builtin.shell: docker compose build
   args:
-    chdir: ~/base-docker-environment
+    chdir: ~/traefik
 
 - name: Run docker project
   ansible.builtin.shell: docker compose up -d
   args:
     creates: /etc/traefik/success
-    chdir: ~/base-docker-environment
+    chdir: ~/traefik

@@ -34,6 +34,8 @@ all:
           ansible_user: debian
           ansible_ssh_private_key_file: "{{ ssh_keys_path }}/cmf-east-2.pem"
           upgrades_REBOOT_AT: "01:00"
+          prom_cluster: another-test-a
+          prom_environment: another-test
 
           # clone_dir: gnosis
           # DEPLOY_COMPOSE_FILE: lh-consensus.yml:nm.yml:grafana.yml:prometheus-traefik.yml:ext-network.yml

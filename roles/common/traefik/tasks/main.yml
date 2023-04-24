@@ -1,6 +1,4 @@
 ---
-# - name: Include variables
-#   include_vars: "{{inventory_dir}}/group_vars/main.yml"
 
 - name: Install git and dbus
   apt:
@@ -17,7 +15,7 @@
 
 - name: clone repo
   ansible.builtin.git:
-    repo: https://github.com/eth-educators/eth-docker.git
+    repo: https://github.com/CryptoManufaktur-io/base-docker-environment.git
     dest: ~/traefik
     version: main
 
@@ -26,12 +24,6 @@
     src: ~/traefik/default.env
     dest: ~/traefik/.env
     remote_src: yes
-
-- name: set COMPOSE_FILE to traefik-cf.yml
-  ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^COMPOSE_FILE='
-    line: COMPOSE_FILE=traefik-cf.yml
 
 - name: set DOMAIN to cryptomanufaktur.net
   ansible.builtin.lineinfile:
@@ -86,8 +78,18 @@
     regexp: '^CF_API_TOKEN='
     line: CF_API_TOKEN={{traefik_cf_api_token}}
 
-- name: Install traefik if not existing
-  ansible.builtin.shell: ./ethd up
+- name: Create custom-prom.yml
+  template:
+    src: custom-prom.j2
+    dest: ~/traefik/prometheus/custom-prom.yml
+
+- name: Build project
+  ansible.builtin.shell: docker compose build
+  args:
+    chdir: ~/traefik
+
+- name: Run docker project
+  ansible.builtin.shell: docker compose up -d
   args:
     creates: /etc/traefik/success
     chdir: ~/traefik

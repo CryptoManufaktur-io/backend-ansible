@@ -1,0 +1,6 @@
+---
+    - name: Deploy Dirk
+      hosts: all
+      gather_facts: false
+      roles:
+        - eth/deploydirk

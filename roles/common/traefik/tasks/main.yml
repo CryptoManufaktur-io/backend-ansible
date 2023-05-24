@@ -1,10 +1,11 @@
 ---
-
 - name: Install git and dbus
   apt:
-    pkg:
+    name:
     - git
     - dbus
+    update_cache: yes
+    cache_valid_time: 86400
   become: true
 
 - name: Start service dbus, if not started
@@ -19,23 +20,33 @@
     dest: ~/traefik
     version: main
 
+- name: Check if .env file exists
+  ansible.builtin.stat:
+    path: "~/traefik/.env"
+  register: env_file_status
+
 - name: Create .env file
   ansible.builtin.copy:
-    src: ~/traefik/default.env
-    dest: ~/traefik/.env
-    remote_src: yes
+    src: "~/traefik/default.env"
+    dest: "~/traefik/.env"
+    remote_src: true
+  when: not env_file_status.stat.exists
 
-- name: set DOMAIN to cryptomanufaktur.net
+- name: set variables
   ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^DOMAIN='
-    line: DOMAIN=cryptomanufaktur.net
+    path: "~/traefik/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ traefik_env_variables }}"
+  when: traefik_env_variables is defined
 
-- name: set DDNS_PROXY to false
+- name: set group variables
   ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^DDNS_PROXY='
-    line: DDNS_PROXY=false
+    path: "~/traefik/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ traefik_group_env_variables }}"
+  when: traefik_group_env_variables is defined
 
 - name: Set hostname
   ansible.builtin.hostname:
@@ -46,50 +57,13 @@
   debug:
     msg: "Hostname set to {{ inventory_hostname_short }}"
 
-- name: Get hostname
-  shell: hostname
-  register: result
-
-- name: Print the var
-  debug:
-    var: result
-
-- name: set DDNS_SUBDOMAIN to hostname
-  ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^DDNS_SUBDOMAIN='
-    line: DDNS_SUBDOMAIN={{result.stdout}}
-
-- name: set ACME_EMAIL
-  ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^ACME_EMAIL='
-    line: ACME_EMAIL={{traefik_acme_email}}
-
-- name: set CF_EMAIL
-  ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^CF_EMAIL='
-    line: CF_EMAIL={{traefik_cf_email}}
-
-- name: set CF_API_TOKEN
-  ansible.builtin.lineinfile:
-    path: ~/traefik/.env
-    regexp: '^CF_API_TOKEN='
-    line: CF_API_TOKEN={{traefik_cf_api_token}}
-
-- name: Create custom-prom.yml
-  template:
-    src: custom-prom.j2
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
     dest: ~/traefik/prometheus/custom-prom.yml
+  when: traefik_prom_environment is defined
 
-- name: Build project
-  ansible.builtin.shell: docker compose build
+- name: Start traefik
+  ansible.builtin.shell: ./ethd up
   args:
-    chdir: ~/traefik
-
-- name: Run docker project
-  ansible.builtin.shell: docker compose up -d
-  args:
-    creates: /etc/traefik/success
     chdir: ~/traefik

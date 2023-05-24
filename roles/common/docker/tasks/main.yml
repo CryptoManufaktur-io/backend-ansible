@@ -1,11 +1,13 @@
 ---
 - name: Install packages
   apt:
-    pkg:
+    name:
     - ca-certificates
     - curl
     - gnupg
     - lsb-release
+    update_cache: yes
+    cache_valid_time: 86400
   become: true
 
 - name: Create a directory if it does not exist
@@ -14,17 +16,12 @@
     state: directory
   become: true
 
-- name: Remove the GPG key for Docker
-  ansible.builtin.file:
-    path: /etc/apt/keyrings/docker.gpg
-    state: absent
-  become: true
-
 - name: Add the GPG key for Docker
   shell: 'curl -fsSL -m10 https://download.docker.com/linux/debian/gpg | gpg --batch --dearmor -o /etc/apt/keyrings/docker.gpg'
   become: true
   async: 10
   poll: 10
+  creates: /etc/apt/keyrings/docker.gpg
 
 - name: Get architecture
   command: dpkg --print-architecture
@@ -40,21 +37,17 @@
     state: present
   become: true
 
-- name: Update apt cache again with the new repo
-  apt:
-    update_cache: yes
-  become: true
-
 - name: Install docker
   apt:
-    pkg:
+    name:
     - docker-ce
     - docker-ce-cli
     - containerd.io
     - docker-compose-plugin
+    update_cache: yes
   become: true
 
-- name: Dist upgrade
+- name: apt dist-upgrade
   apt:
     upgrade: dist
   become: true

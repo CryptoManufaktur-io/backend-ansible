@@ -21,7 +21,8 @@
   become: true
   async: 10
   poll: 10
-  creates: /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
 
 - name: Get architecture
   command: dpkg --print-architecture

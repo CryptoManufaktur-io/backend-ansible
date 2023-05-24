@@ -5,139 +5,41 @@
     dest: "~/{{clone_dir}}"
     version: main
 
+- name: Check if .env file exists
+  ansible.builtin.stat:
+    path: "~/{{clone_dir}}/.env"
+  register: env_file_status
+
 - name: Create .env file
   ansible.builtin.copy:
     src: "~/{{clone_dir}}/default.env"
     dest: "~/{{clone_dir}}/.env"
     remote_src: yes
+  when: not env_file_status.stat.exists
 
-- name: set COMPOSE_FILE
+- name: set variables
   ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^COMPOSE_FILE='
-    line: COMPOSE_FILE={{DEPLOY_COMPOSE_FILE}}
-  when: DEPLOY_COMPOSE_FILE is defined
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ env_variables }}"
+  when: env_variables is defined
 
-- name: set FEE_RECIPIENT
+- name: set group variables
   ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^FEE_RECIPIENT='
-    line: FEE_RECIPIENT={{FEE_RECIPIENT}}
-  when: FEE_RECIPIENT is defined
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ group_env_variables }}"
+  when: group_env_variables is defined
 
-- name: set NETWORK
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^NETWORK='
-    line: NETWORK={{NETWORK}}
-  when: NETWORK is defined
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
+  when: prom_environment is defined
 
-- name: set DOMAIN
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^DOMAIN='
-    line: DOMAIN={{DOMAIN}}
-  when: DOMAIN is defined
-
-- name: set GRAFANA_HOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^GRAFANA_HOST='
-    line: GRAFANA_HOST={{GRAFANA_HOST}}
-  when: GRAFANA_HOST is defined
-
-- name: set PROM_HOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^PROM_HOST='
-    line: PROM_HOST={{PROM_HOST}}
-  when: PROM_HOST is defined
-
-- name: set EL_HOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^EL_HOST='
-    line: EL_HOST={{EL_HOST}}
-  when: EL_HOST is defined
-
-- name: set EL_LB
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^EL_LB='
-    line: EL_LB={{EL_LB}}
-  when: EL_LB is defined
-
-- name: set EL_WS_HOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^EL_WS_HOST='
-    line: EL_WS_HOST={{EL_WS_HOST}}
-  when: EL_WS_HOST is defined
-
-- name: set EL_WS_LB
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^EL_WS_LB='
-    line: EL_WS_LB={{EL_WS_LB}}
-  when: EL_WS_LB is defined
-
-- name: set CL_HOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^CL_HOST='
-    line: CL_HOST={{CL_HOST}}
-  when: CL_HOST is defined
-
-- name: set CL_LB
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^CL_LB='
-    line: CL_LB={{CL_LB}}
-  when: CL_LB is defined
-
-- name: set SSV_P2P_PORT
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^SSV_P2P_PORT='
-    line: SSV_P2P_PORT={{SSV_P2P_PORT}}
-  when: SSV_P2P_PORT is defined
-
-- name: set SSV_P2P_PORT_UDP
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^SSV_P2P_PORT_UDP='
-    line: SSV_P2P_PORT_UDP={{SSV_P2P_PORT_UDP}}
-  when: SSV_P2P_PORT_UDP is defined
-
-- name: set RAPID_SYNC_URL
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^RAPID_SYNC_URL='
-    line: RAPID_SYNC_URL={{RAPID_SYNC_URL}}
-  when: RAPID_SYNC_URL is defined
-
-- name: set MEV_BOOST
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^MEV_BOOST='
-    line: MEV_BOOST={{MEV_BOOST}}
-  when: MEV_BOOST is defined
-
-- name: set MEV_RELAYS
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^MEV_RELAYS='
-    line: MEV_RELAYS={{MEV_RELAYS}}
-  when: MEV_RELAYS is defined
-
-- name: set MEV_NODE
-  ansible.builtin.lineinfile:
-    path: "~/{{clone_dir}}/.env"
-    regexp: '^MEV_NODE='
-    line: MEV_NODE={{MEV_NODE}}
-  when: MEV_NODE is defined
-
-- name: deploy node
+- name: start node
   ansible.builtin.shell: ./ethd up
   args:
     chdir: ~/{{clone_dir}}

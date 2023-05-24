@@ -1,21 +1,17 @@
 ---
-- name: Update apt cache
-  apt: update_cache=yes cache_valid_time=3600
-  become: true
-
-- name: Upgrade all apt packages
-  apt: upgrade=dist
-  become: true
-
-- name: Install ufw and other packages
+- name: Install ufw and at
   apt:
-    name: "{{ packages }}"
-    state: present
-    update_cache: yes
-  vars:
-    packages:
+    name:
     - ufw
     - at
+    state: present
+    update_cache: yes
+    cache_valid_time: 86400
+  become: true
+
+- name: apt dist-upgrade
+  apt:
+    upgrade: dist
   become: true
 
 - name: Allow SSH traffic from the infra bastion host

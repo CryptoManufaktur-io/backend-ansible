@@ -1,8 +1,5 @@
 ---
-# - name: Include variables
-#   include_vars: "{{inventory_dir}}/group_vars/main.yml"
-
-- name: Allow all access from other nodes to this host
+- name: Allow access from other nodes to this host
   community.general.ufw:
     rule: allow
     src: '{{ item.cidr }}'
@@ -12,14 +9,14 @@
   loop: '{{ ufw.allow }}'
   become: true
 
-- name: deny  access from other nodes to this host
+- name: Allow access from additional nodes to this host
   community.general.ufw:
-    rule: deny
+    rule: allow
     src: '{{ item.cidr }}'
     port: '{{ item.port }}'
     proto: '{{ item.protocol }}'
-    comment: "Deny access from specific hosts"
-  loop: '{{ ufw.deny }}'
+    comment: '{{ item.description }}'
+  loop: '{{ ufw_extra_rules.allow }}'
   become: true
 
 - name: Deny all access to port 443
@@ -29,7 +26,7 @@
     proto: tcp
   become: true
 
-- name: Allow everything and enable UFW
+- name: Enable UFW
   community.general.ufw:
     state: enabled
   become: true

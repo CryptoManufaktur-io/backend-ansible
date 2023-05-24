@@ -30,14 +30,6 @@
     dest: "~/{{ clone_dir }}/.env"
   when: not env_file_status.stat.exists
 
-- name: set variables
-  ansible.builtin.lineinfile:
-    path: "~/{{ clone_dir }}/.env"
-    regexp: '^{{ item.key }}='
-    line: "{{ item.key }}={{ item.value }}"
-  loop: "{{ env_variables }}"
-  when: env_variables is defined
-
 - name: set group variables
   ansible.builtin.lineinfile:
     path: "~/{{ clone_dir }}/.env"
@@ -45,6 +37,14 @@
     line: "{{ item.key }}={{ item.value }}"
   loop: "{{ group_env_variables }}"
   when: group_env_variables is defined
+
+- name: set variables
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ env_variables }}"
+  when: env_variables is defined
 
 - name: Deploy custom-prom.yml file
   ansible.builtin.template:

@@ -32,14 +32,6 @@
     remote_src: true
   when: not env_file_status.stat.exists
 
-- name: set variables
-  ansible.builtin.lineinfile:
-    path: "~/traefik/.env"
-    regexp: '^{{ item.key }}='
-    line: "{{ item.key }}={{ item.value }}"
-  loop: "{{ traefik_env_variables }}"
-  when: traefik_env_variables is defined
-
 - name: set group variables
   ansible.builtin.lineinfile:
     path: "~/traefik/.env"
@@ -47,6 +39,14 @@
     line: "{{ item.key }}={{ item.value }}"
   loop: "{{ traefik_group_env_variables }}"
   when: traefik_group_env_variables is defined
+
+- name: set variables
+  ansible.builtin.lineinfile:
+    path: "~/traefik/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ traefik_env_variables }}"
+  when: traefik_env_variables is defined
 
 - name: Set hostname
   ansible.builtin.hostname:

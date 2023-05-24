@@ -18,6 +18,7 @@
     comment: '{{ item.description }}'
   loop: '{{ ufw_extra_rules.allow }}'
   become: true
+  when: ufw_extra_rules.allow is defined
 
 - name: Deny all access to port 443
   community.general.ufw:

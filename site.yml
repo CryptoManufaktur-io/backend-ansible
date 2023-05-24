@@ -7,7 +7,6 @@
           when: inventory_hostname in groups["baremetal_nodes"]
         - common/update_apt
         - common/msmtp
-        - common/chrony
         - role: common/docker
           tags:
             - docker

@@ -4,9 +4,9 @@
     env: yes
     job: "{{ upgrades_EMAIL_TO }}"
 
-- name: Create diskspace task
-  ansible.builtin.cron:
-    name: "check space"
-    minute: "0"
-    hour: "12"
-    job: "/home/{{ ansible_user }}/traefik/auto-prune.sh --dry-run"
+#- name: Create diskspace task
+#  ansible.builtin.cron:
+#    name: "check space"
+#    minute: "0"
+#    hour: "12"
+#    job: "/home/{{ ansible_user }}/traefik/auto-prune.sh --dry-run"

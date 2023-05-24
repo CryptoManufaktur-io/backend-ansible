@@ -1,8 +1,10 @@
 ---
 - name: Install msmtp-mta
   apt:
-    pkg:
+    name:
     - msmtp-mta
+    update_cache: yes
+    cache_valid_time: 86400
   become: true
 - name: Create /etc/msmtprc
   template:

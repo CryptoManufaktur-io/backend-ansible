@@ -1,0 +1,63 @@
+---
+- name: clone repo
+  ansible.builtin.git:
+    repo: https://github.com/CryptoManufaktur-io/vouchdirk-docker.git
+    dest: "~/{{ clone_dir }}"
+    version: main
+
+- name: Install rsync
+  apt:
+    name:
+    - rsync
+    update_cache: yes
+    cache_valid_time: 86400
+  become: true
+
+- name: Synchronize config directory
+  ansible.builtin.synchronize:
+    src: "{{ config_src }}/"
+    dest: "~/{{ clone_dir }}/config"
+    use_ssh_args: yes
+
+- name: Check if .env file exists
+  ansible.builtin.stat:
+    path: "~/{{ clone_dir }}/.env"
+  register: env_file_status
+
+- name: Create .env file
+  ansible.builtin.copy:
+    src: "{{ config_src }}/../.env"
+    dest: "~/{{ clone_dir }}/.env"
+  when: not env_file_status.stat.exists
+
+- name: set variables
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ env_variables }}"
+  when: env_variables is defined
+
+- name: set group variables
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ group_env_variables }}"
+  when: group_env_variables is defined
+
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
+
+- name: start dirk
+  ansible.builtin.shell: docker compose up -d
+  args:
+    chdir: ~/{{ clone_dir }}
+
+- name: create wallet
+  ansible.builtin.shell: docker compose run --rm create-wallet && docker compose down && docker compose up -d && touch ~/{{ clone_dir }}/.wallet_created
+  args:
+    chdir: ~/{{ clone_dir }}
+    creates: ~/{{ clone_dir }}/.wallet_created

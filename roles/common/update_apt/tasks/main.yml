@@ -1,16 +1,12 @@
 ---
-- name: Update apt cache
+- name: Install common helper packages
   apt:
-    update_cache: yes
-  become: true
-- name: Install htop
-  apt:
-    pkg:
+    name:
     - htop
-  become: true
-
-- name: Install bc
-  apt:
-    pkg:
     - bc
+    - chrony
+    - jq
+    - smartmontools
+    update_cache: yes
+    cache_valid_time: 86400
   become: true

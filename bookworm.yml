@@ -1,0 +1,7 @@
+---
+    - name: Upgrade to Debian bookworm
+      hosts: all
+      serial: 1
+      gather_facts: false
+      roles:
+        - common/upgrade_os

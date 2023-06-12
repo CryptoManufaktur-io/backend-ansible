@@ -1,7 +1,7 @@
 ---
 - name: clone repo
   ansible.builtin.git:
-    repo: https://github.com/eth-educators/eth-docker.git
+    repo: "{{repo_url}}"
     dest: "~/{{clone_dir}}"
     version: main
 

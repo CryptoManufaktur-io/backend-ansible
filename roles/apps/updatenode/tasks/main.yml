@@ -59,3 +59,16 @@
       not execution_info.container.State.Running or
       execution_info.container.State.ExitCode != 0
     )
+
+- name: Get version
+  ansible.builtin.shell: ./ethd version
+  args:
+    chdir: ~/{{clone_dir}}
+    executable: /bin/bash
+  register: version_output
+  when: consensus_info.exists
+
+- name: ./ethd version output
+  debug:
+    var: version_output.stdout_lines
+  when: consensus_info.exists

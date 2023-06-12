@@ -50,3 +50,6 @@
     test_command: whoami
   become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
+- name: Pause for 5 minutes to allow node to come back into sync
+  pause:
+    minutes: 5

@@ -1,0 +1,61 @@
+---
+- name: update node software
+  ansible.builtin.shell: ./ethd update
+  args:
+    chdir: ~/{{clone_dir}}
+    executable: /bin/bash
+
+- name: restart changed software
+  ansible.builtin.shell: ./ethd up
+  args:
+    chdir: ~/{{clone_dir}}
+    executable: /bin/bash
+  register: up_output
+
+- name: Result of ./ethd up
+  debug:
+    var: up_output.stderr_lines
+
+- name: Wait for the Docker container to stabilize
+  pause:
+    seconds: 30
+
+- name: Get execution container info
+  docker_container_info:
+    name: "{{clone_dir}}-execution-1" 
+  register: execution_info
+
+- name: Get consensus  container info
+  docker_container_info:
+    name: "{{clone_dir}}-consensus-1"
+  register: consensus_info
+
+- name: Pretty-print consensus JSON
+  shell: echo '{{ consensus_info | to_nice_json }}'
+  register: consensus_json
+
+- name: Print consensus info
+  debug:
+    msg: "{{ consensus_json.stdout }}"
+    verbosity: 1
+
+- name: Pretty-print execution JSON
+  shell: echo '{{ execution_info | to_nice_json }}'
+  register: execution_json
+
+- name: Print execution info
+  debug:
+    msg: "{{ execution_json.stdout }}"
+    verbosity: 1
+
+- name: Fail if consensus or execution container is not running
+  fail:
+    msg: "Either consensus or execution is not running"
+  when: >
+    consensus_info.exists and
+    (
+      not consensus_info.container.State.Running or
+      consensus_info.container.State.ExitCode != 0 or
+      not execution_info.container.State.Running or
+      execution_info.container.State.ExitCode != 0
+    )

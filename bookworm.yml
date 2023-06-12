@@ -4,4 +4,4 @@
       serial: 1
       gather_facts: false
       roles:
-        - common/upgrade_os
+        - base/upgrade_os

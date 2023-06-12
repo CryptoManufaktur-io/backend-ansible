@@ -3,21 +3,21 @@
     hosts: all
     gather_facts: false
     roles:
-        - role: common/bastion_ssh_only
+        - role: base/bastion_ssh_only
           when: inventory_hostname in groups["baremetal_nodes"]
-        - common/update_apt
-        - common/msmtp
-        - role: common/docker
+        - base/update_apt
+        - base/msmtp
+        - role: base/docker
           tags:
             - docker
-        - common/vimrc
-        - common/traefik
-        - role: common/dockerufw
+        - base/vimrc
+        - base/traefik
+        - role: base/dockerufw
           when: inventory_hostname in groups["baremetal_nodes"]
-        - role: common/ufw
+        - role: base/ufw
           when: inventory_hostname in groups["baremetal_nodes"]
-        - common/upgrades
-        - role: common/diskspace-crontab
+        - base/upgrades
+        - role: base/diskspace-crontab
           tags:
             - diskspace-crontab
-        - common/performance
+        - base/performance

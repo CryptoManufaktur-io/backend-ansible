@@ -68,6 +68,9 @@
     append: yes
   become: true
 
+- name: Reset SSH connection
+  meta: reset_connection
+
 - name: Add docker compose alias for current user
   lineinfile:
     path: "{{ user_home.stdout }}/.profile"

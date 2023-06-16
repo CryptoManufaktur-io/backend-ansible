@@ -41,16 +41,16 @@
   become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Re-enable msmtp apparmor profile
-    ansible.builtin.file:
-      path: /etc/apparmor.d/disable/usr.bin.msmtp
-      state: absent
-    become: yes
+  ansible.builtin.file:
+    path: /etc/apparmor.d/disable/usr.bin.msmtp
+    state: absent
+  become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Restart apparmor service
-    ansible.builtin.systemd:
-      name: apparmor
-      state: restarted
-    become: yes
+  ansible.builtin.systemd:
+    name: apparmor
+    state: restarted
+  become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Reboot on bookworm
   ansible.builtin.reboot:

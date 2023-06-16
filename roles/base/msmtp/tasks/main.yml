@@ -11,3 +11,8 @@
     src: .msmtprc.j2
     dest: /etc/msmtprc
   become: true
+- name: Create /etc/aliases
+  ansible.builtin.copy:
+    dest: /etc/aliases
+    content: "default: engineering@cryptomanufaktur.io"
+    mode: 0644

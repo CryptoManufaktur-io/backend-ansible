@@ -27,14 +27,16 @@
     paths: /etc/apt/sources.list.d
     patterns: '*'
     recurse: no
-  register: 3rd_party_repos
+  register: third_party_repos
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Switch 3rd-party repos from bullseye to bookworm
   ansible.builtin.replace:
     path: "{{ item.path }}"
     regexp: 'bullseye'
     replace: 'bookworm'
-  loop: "{{ 3rd_party_repos.files }}"
+  loop: "{{ third_party_repos.files }}"
+  loop_control:
+    label: "{{ item.path }}"
   become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Use apt to move to bookworm

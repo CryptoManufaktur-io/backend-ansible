@@ -15,6 +15,13 @@
     replace: 'bookworm'
   become: yes
   when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
+- Name: Add non-free-firmware if non-free is in use
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list
+    regexp: '(.*non-free.*)'
+    replace: '\1 non-free-firmware'
+  become: yes
+  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Check if docker-ce exists
   ansible.builtin.stat:
     path: /etc/apt/sources.list.d/docker.list

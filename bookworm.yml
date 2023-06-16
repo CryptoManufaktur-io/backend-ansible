@@ -1,7 +1,7 @@
 ---
-    - name: Upgrade to Debian bookworm
-      hosts: all
-      serial: 1
-      gather_facts: false
-      roles:
-        - base/upgrade_os
+- name: Upgrade to Debian bookworm
+  hosts: all
+  serial: 1
+  gather_facts: false
+  roles:
+    - base/upgrade_os

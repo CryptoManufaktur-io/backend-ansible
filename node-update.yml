@@ -1,7 +1,7 @@
 ---
-    - name: Update blockchain node software
-      hosts: all
-      serial: 1
-      gather_facts: false
-      roles:
-        - apps/updatenode
+- name: Update blockchain node software
+  hosts: all
+  serial: 1
+  gather_facts: false
+  roles:
+    - apps/updatenode

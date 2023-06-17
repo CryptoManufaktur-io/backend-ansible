@@ -70,7 +70,7 @@
 - name: Fail if not Debian 12
   assert:
     that:
-      - ansible_distribution_version  == '12'
+      - ansible_distribution_version is match("12.*")
     fail_msg: "Upgrade to Debian 12 failed"
 - name: apt autoremove
   apt:

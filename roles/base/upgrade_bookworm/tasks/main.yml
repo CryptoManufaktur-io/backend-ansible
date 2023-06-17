@@ -5,10 +5,32 @@
 - name: Skip if not Debian 11
   meta: end_host
   when: ansible_distribution != 'Debian' or ansible_distribution_version != '11'
+- name: apt clean
+  apt:
+    clean: yes
+  become: yes
+- name: Get filesystem facts
+  setup:
+    filter: ansible_mounts
+- name: Fail if free space on / is below 3 GiB
+  ansible.builtin.assert:
+    that:
+      - item.size_available > (3 * 1024 * 1024 * 1024)
+    fail_msg: "Free disk space on {{ item.mount }} is below 3 GiB"
+  loop: "{{ ansible_mounts }}"
+  when: item.mount == "/"
 - name: All apt packages up to date
   apt:
     upgrade: dist
     update_cache: yes
+  become: yes
+- name: apt autoremove
+  apt:
+    autoremove: yes
+  become: yes
+- name: apt clean
+  apt:
+    clean: yes
   become: yes
 - name: Switch OS from bullseye to bookworm
   ansible.builtin.replace:
@@ -53,6 +75,10 @@
 - name: apt autoremove
   apt:
     autoremove: yes
+  become: yes
+- name: apt clean
+  apt:
+    clean: yes
   become: yes
 - name: Re-enable msmtp apparmor profile
   ansible.builtin.file:

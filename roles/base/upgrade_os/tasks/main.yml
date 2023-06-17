@@ -2,33 +2,32 @@
 - name: Get distribution version
   setup:
     filter: ansible_distribution*
+- name: Skip if not Debian 11
+  meta: end_host
+  when: ansible_distribution != 'Debian' or ansible_distribution_version != '11'
 - name: All apt packages up to date
   apt:
     upgrade: dist
     update_cache: yes
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Switch OS from bullseye to bookworm
   ansible.builtin.replace:
     path: /etc/apt/sources.list
     regexp: 'bullseye'
     replace: 'bookworm'
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Add non-free-firmware if non-free is in use
   ansible.builtin.replace:
     path: /etc/apt/sources.list
     regexp: '(.*non-free.*)'
     replace: '\1 non-free-firmware'
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Find all 3rd-party repos
   ansible.builtin.find:
     paths: /etc/apt/sources.list.d
     patterns: '*'
     recurse: no
   register: third_party_repos
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Switch 3rd-party repos from bullseye to bookworm
   ansible.builtin.replace:
     path: "{{ item.path }}"
@@ -38,33 +37,33 @@
   loop_control:
     label: "{{ item.path }}"
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Use apt to move to bookworm
   apt:
     upgrade: dist
     update_cache: yes
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
 - name: Get distribution version
   setup:
     filter: ansible_distribution*
+- name: Fail if not Debian 12
+  assert:
+    that:
+      - ansible_distribution_version  == '12'
+    fail_msg: "Upgrade to Debian 12 failed"
 - name: apt autoremove
   apt:
     autoremove: yes
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Re-enable msmtp apparmor profile
   ansible.builtin.file:
     path: /etc/apparmor.d/disable/usr.bin.msmtp
     state: absent
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Restart apparmor service
   ansible.builtin.systemd:
     name: apparmor
     state: restarted
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Reboot on bookworm
   ansible.builtin.reboot:
     msg: "Reboot initiated by Ansible"
@@ -74,7 +73,6 @@
     post_reboot_delay: 60
     test_command: whoami
   become: yes
-  when: ansible_distribution == 'Debian' and ansible_distribution_version == '12'
 - name: Pause for 5 minutes to allow node to come back into sync
   pause:
     minutes: 5

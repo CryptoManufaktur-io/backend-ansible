@@ -3,7 +3,6 @@
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
 upgrades_EMAIL_TO: user@example.com
-upgrades_SSMTP_CONF: /etc/ssmtp/ssmtp.conf
 upgrades_EMAIL: user@example.com
 upgrades_EPW: password
 upgrades_MAILSRV: smtp.gmail.com:587

@@ -8,6 +8,7 @@
     comment: '{{ item.description }}'
   loop: '{{ ufw.allow }}'
   become: true
+  when: ufw.allow is defined
 
 - name: Allow access from additional nodes to this host
   community.general.ufw:

@@ -1,7 +1,4 @@
 # Variables that apply to all production hosts.
-traefik_acme_email: user@example.com
-traefik_cf_api_token: ""
-traefik_cf_email: user@example.com
 
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
@@ -19,19 +16,9 @@ infra_bastion_backup_hostname: bastion-backup.example.com
 bastion_username: jdoe
 ssh_keys_path: ~/.ssh
 
-# Prometheus remote write.
-prom_remote_write_url: https://prometheus.example.com/api/v1/push
-prom_remote_write_headers:
-  "header-one": ""
-  "header-two": ""
-
 ufw:
   allow:
     - cidr: 192.168.1.100/32
       port: 443
       protocol: tcp
       description: Allow port 443 access from known server
-  deny:
-    - cidr: 0.0.0.0/0
-      port: 443
-      protocol: tcp

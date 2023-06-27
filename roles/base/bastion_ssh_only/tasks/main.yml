@@ -10,6 +10,7 @@
 
 - name: Allow SSH traffic from everywhere as failsafe
   ufw:
+    insert: 1
     rule: allow
     port: "22"
     proto: "tcp"

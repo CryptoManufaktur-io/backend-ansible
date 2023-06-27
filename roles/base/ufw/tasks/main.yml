@@ -21,6 +21,14 @@
   become: true
   when: ufw_extra_rules.allow is defined
 
+- name: Delete deny rule to port 443
+  community.general.ufw:
+    delete: true
+    rule: deny
+    port: '443'
+    proto: tcp
+  become: true
+
 - name: Deny all access to port 443
   community.general.ufw:
     rule: deny

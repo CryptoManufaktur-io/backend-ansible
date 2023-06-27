@@ -8,8 +8,8 @@
   debug:
     msg: "upgrades_REBOOT_AT={{ upgrades_REBOOT_AT }}"
 
-- name: Run  /tmp/enable-autoupdate.sh script only if /etc/ssmtp/success does not exist on the remote node
+- name: Run /tmp/enable-autoupdate.sh script
   ansible.builtin.shell: /tmp/enable-autoupdate.sh
   become: true
   args:
-    creates: /etc/ssmtp/success
+    creates: /etc/apt/uu_success

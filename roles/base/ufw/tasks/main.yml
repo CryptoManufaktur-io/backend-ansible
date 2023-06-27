@@ -1,4 +1,13 @@
 ---
+- name: Install ufw
+  apt:
+    name:
+    - ufw
+    state: present
+    update_cache: yes
+    cache_valid_time: 86400
+  become: true
+
 - name: Allow access from other nodes to this host
   community.general.ufw:
     rule: allow

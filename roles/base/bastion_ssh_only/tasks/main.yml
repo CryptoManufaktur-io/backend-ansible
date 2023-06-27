@@ -1,17 +1,19 @@
 ---
-- name: Install ufw and at
+- name: Install ufw
   apt:
     name:
     - ufw
-    - at
     state: present
     update_cache: yes
     cache_valid_time: 86400
   become: true
 
-- name: apt dist-upgrade
-  apt:
-    upgrade: dist
+- name: Allow SSH traffic from everywhere as failsafe
+  ufw:
+    rule: allow
+    port: "22"
+    proto: "tcp"
+    comment: "Allow SSH from everywhere as failsafe"
   become: true
 
 - name: Allow SSH traffic from the infra bastion host
@@ -39,14 +41,6 @@
     comment: "Deny all other SSH traffic"
   become: true
 
-- name: Schedule a command to reset action in {{reset_ssh_minutes}} minutes as root if not successful.
-  at:
-    command: "{{reset_ssh_command}}"
-    count: "{{reset_ssh_minutes}}"
-    units: minutes
-    unique: yes
-  become: true
-
 - name: Enable UFW
   ufw:
     state: enabled
@@ -72,9 +66,11 @@
   failed_when: ssh_output.failed == true
   changed_when: false
 
-- name: Remove reset action if successful.
-  when: ssh_output.failed == false
-  at:
-    command: "{{reset_ssh_command}}"
-    state: absent
+- name: Remove ssh failsafe if successful
+  ufw:
+    delete: true
+    rule: allow
+    port: "22"
+    proto: "tcp"
   become: true
+  when: ssh_output.failed == false

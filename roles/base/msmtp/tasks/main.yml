@@ -14,5 +14,6 @@
 - name: Create /etc/aliases
   ansible.builtin.copy:
     dest: /etc/aliases
-    content: "default: engineering@cryptomanufaktur.io"
+    content: "default: {{upgrades_EMAIL_TO}}"
     mode: 0644
+  become: true

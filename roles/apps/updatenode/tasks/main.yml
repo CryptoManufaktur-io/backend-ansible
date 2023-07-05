@@ -1,9 +1,15 @@
 ---
+- name: Check traefik directory
+  stat:
+    path: ~/traefik
+  register: traefik_check
+
 - name: update traefik
   ansible.builtin.shell: ./ethd update
   args:
     chdir: ~/traefik
     executable: /bin/bash
+  when: traefik_check.stat.isdir is defined and traefik_check.stat.isdir
 
 - name: restart changed software
   ansible.builtin.shell: ./ethd up
@@ -11,10 +17,12 @@
     chdir: ~/traefik
     executable: /bin/bash
   register: up_output
+  when: traefik_check.stat.isdir is defined and traefik_check.stat.isdir
 
 - name: Result of ./ethd up
   debug:
     var: up_output.stderr_lines
+  when: traefik_check.stat.isdir is defined and traefik_check.stat.isdir
 
 - name: Skip node update?
   meta: end_host

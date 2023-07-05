@@ -1,4 +1,25 @@
 ---
+- name: update traefik
+  ansible.builtin.shell: ./ethd update
+  args:
+    chdir: ~/traefik
+    executable: /bin/bash
+
+- name: restart changed software
+  ansible.builtin.shell: ./ethd up
+  args:
+    chdir: ~/traefik
+    executable: /bin/bash
+  register: up_output
+
+- name: Result of ./ethd up
+  debug:
+    var: up_output.stderr_lines
+
+- name: Skip node update?
+  meta: end_host
+  when: skip_node | default(false)
+
 - name: update node software
   ansible.builtin.shell: ./ethd update
   args:

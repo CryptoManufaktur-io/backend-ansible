@@ -1,0 +1,9 @@
+---
+- name: Update traefik
+  hosts: all
+  vars:
+    skip_node: true
+  serial: 1
+  gather_facts: false
+  roles:
+    - apps/updatenode

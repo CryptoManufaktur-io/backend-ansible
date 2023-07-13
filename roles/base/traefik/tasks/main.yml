@@ -48,6 +48,13 @@
   loop: "{{ traefik_env_variables }}"
   when: traefik_env_variables is defined
 
+- name: set logs label for promtail to unique server name
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^LOGS_LABEL='
+    line: "LOGS_LABEL={{ prom_cluster }}"
+  when: prom_cluster is defined
+
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname_short }}"
@@ -62,6 +69,12 @@
     src: custom-prom.yml.j2
     dest: ~/traefik/prometheus/custom-prom.yml
   when: traefik_prom_environment is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
+  when: prom_cluster is defined
 
 - name: Start traefik
   ansible.builtin.shell: ./ethd up

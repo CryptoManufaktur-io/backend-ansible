@@ -50,11 +50,24 @@
   loop: "{{ env_variables }}"
   when: env_variables is defined
 
+- name: set logs label for promtail to unique server name
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^LOGS_LABEL='
+    line: "LOGS_LABEL={{ prom_cluster }}"
+  when: prom_cluster is defined
+
 - name: Deploy custom-prom.yml file
   ansible.builtin.template:
     src: custom-prom.yml.j2
     dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
   when: prom_environment is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
+  when: prom_cluster is defined
 
 - name: restart changed software
   ansible.builtin.shell: ./ethd up

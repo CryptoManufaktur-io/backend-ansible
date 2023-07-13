@@ -46,10 +46,21 @@
   loop: "{{ env_variables }}"
   when: env_variables is defined
 
+- name: set logs label for promtail to unique server name
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^LOGS_LABEL='
+    line: "LOGS_LABEL={{ prom_cluster }}"
+  
 - name: Deploy custom-prom.yml file
   ansible.builtin.template:
     src: custom-prom.yml.j2
     dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
 
 - name: start dirk
   ansible.builtin.shell: docker compose up -d

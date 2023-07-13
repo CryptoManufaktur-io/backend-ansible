@@ -72,6 +72,7 @@ all:
               - { key: "DDNS_PROXY", value: "false" }
             prom_environment: myethers
             prom_url: https://mimir.example.com/api/v1/push
+            loki_url: https://loki.example.com/loki/api/v1/push
             prom_cf_id: clouflare_access_id
             prom_cf_secret: cloudflare_access_secret
             ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""

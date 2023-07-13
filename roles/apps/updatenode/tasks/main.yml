@@ -34,6 +34,28 @@
     chdir: ~/{{clone_dir}}
     executable: /bin/bash
 
+- name: set group variables
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ group_env_variables }}"
+  when: group_env_variables is defined
+
+- name: set variables
+  ansible.builtin.lineinfile:
+    path: "~/{{ clone_dir }}/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ env_variables }}"
+  when: env_variables is defined
+
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
+  when: prom_environment is defined
+
 - name: restart changed software
   ansible.builtin.shell: ./ethd up
   args:

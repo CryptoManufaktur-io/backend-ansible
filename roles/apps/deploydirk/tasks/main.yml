@@ -56,11 +56,13 @@
   ansible.builtin.template:
     src: custom-prom.yml.j2
     dest: ~/{{ clone_dir }}/prometheus/custom-prom.yml
+  when: prom_environment is defined
 
 - name: Deploy custom-lokiurl.yml file
   ansible.builtin.template:
     src: custom-lokiurl.yml.j2
     dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
+  when: loki_url is defined
 
 - name: start dirk
   ansible.builtin.shell: docker compose up -d

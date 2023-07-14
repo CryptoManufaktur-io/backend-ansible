@@ -70,11 +70,11 @@
     dest: ~/traefik/prometheus/custom-prom.yml
   when: traefik_prom_environment is defined
 
-- name: Deploy custom-lokiurl.yml file
-  ansible.builtin.template:
-    src: custom-lokiurl.yml.j2
-    dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
-  when: prom_cluster is defined
+#- name: Deploy custom-lokiurl.yml file
+#  ansible.builtin.template:
+#    src: custom-lokiurl.yml.j2
+#    dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
+#  when: loki_url is defined
 
 - name: Start traefik
   ansible.builtin.shell: ./ethd up

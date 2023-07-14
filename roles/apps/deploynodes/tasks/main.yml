@@ -50,7 +50,7 @@
   ansible.builtin.template:
     src: custom-lokiurl.yml.j2
     dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
-  when: prom_cluster is defined
+  when: loki_url is defined
 
 - name: start node
   ansible.builtin.shell: ./ethd up

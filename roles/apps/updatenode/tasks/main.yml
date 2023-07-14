@@ -50,13 +50,6 @@
   loop: "{{ env_variables }}"
   when: env_variables is defined
 
-- name: set logs label for promtail to unique server name
-  ansible.builtin.lineinfile:
-    path: "~/{{ clone_dir }}/.env"
-    regexp: '^LOGS_LABEL='
-    line: "LOGS_LABEL={{ prom_cluster }}"
-  when: prom_cluster is defined
-
 - name: Deploy custom-prom.yml file
   ansible.builtin.template:
     src: custom-prom.yml.j2

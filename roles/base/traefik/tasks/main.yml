@@ -48,13 +48,6 @@
   loop: "{{ traefik_env_variables }}"
   when: traefik_env_variables is defined
 
-- name: set logs label for promtail to unique server name
-  ansible.builtin.lineinfile:
-    path: "~/{{ clone_dir }}/.env"
-    regexp: '^LOGS_LABEL='
-    line: "LOGS_LABEL={{ prom_cluster }}"
-  when: prom_cluster is defined
-
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ inventory_hostname_short }}"

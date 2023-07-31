@@ -4,6 +4,22 @@
     path: ~/traefik
   register: traefik_check
 
+- name: set traefik group variables
+  ansible.builtin.lineinfile:
+    path: "~/traefik/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ itraefik_group_env_variables }}"
+  when: traefik_group_env_variables is defined
+
+- name: set traefik variables
+  ansible.builtin.lineinfile:
+    path: "~/traefik/.env"
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ item.value }}"
+  loop: "{{ traefik_env_variables }}"
+  when: traefik_env_variables is defined
+
 - name: update traefik
   ansible.builtin.shell: ./ethd update
   args:

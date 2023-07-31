@@ -9,7 +9,7 @@
     path: "~/traefik/.env"
     regexp: '^{{ item.key }}='
     line: "{{ item.key }}={{ item.value }}"
-  loop: "{{ itraefik_group_env_variables }}"
+  loop: "{{ traefik_group_env_variables }}"
   when: traefik_group_env_variables is defined
 
 - name: set traefik variables

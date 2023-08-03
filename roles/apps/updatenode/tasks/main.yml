@@ -44,12 +44,6 @@
   meta: end_host
   when: skip_node | default(false)
 
-- name: update node software
-  ansible.builtin.shell: ./ethd update
-  args:
-    chdir: ~/{{clone_dir}}
-    executable: /bin/bash
-
 - name: set group variables
   ansible.builtin.lineinfile:
     path: "~/{{ clone_dir }}/.env"
@@ -77,6 +71,12 @@
     src: custom-lokiurl.yml.j2
     dest: ~/{{ clone_dir }}/promtail/custom-lokiurl.yml
   when: loki_url is defined
+
+- name: update node software
+  ansible.builtin.shell: ./ethd update
+  args:
+    chdir: ~/{{clone_dir}}
+    executable: /bin/bash
 
 - name: restart changed software
   ansible.builtin.shell: ./ethd up

@@ -8,15 +8,6 @@
     cache_valid_time: 86400
   become: true
 
-- name: Allow SSH traffic from everywhere as failsafe
-  ufw:
-    insert: 1
-    rule: allow
-    port: "22"
-    proto: "tcp"
-    comment: "Allow SSH from everywhere as failsafe"
-  become: true
-
 - name: Allow SSH traffic from the infra bastion host
   ufw:
     rule: allow
@@ -66,12 +57,3 @@
   ignore_errors: yes
   failed_when: ssh_output.failed == true
   changed_when: false
-
-- name: Remove ssh failsafe if successful
-  ufw:
-    delete: true
-    rule: allow
-    port: "22"
-    proto: "tcp"
-  become: true
-  when: ssh_output.failed == false

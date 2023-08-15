@@ -3,9 +3,9 @@
   hosts: all
   gather_facts: false
   roles:
+    - base/update_apt
     - role: base/bastion_ssh_only
       when: inventory_hostname in groups["baremetal_nodes"]
-    - base/update_apt
     - base/msmtp
     - role: base/docker
       tags:

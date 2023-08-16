@@ -21,3 +21,4 @@
       tags:
         - diskspace-crontab
     - base/performance
+    - base/alerting

@@ -17,7 +17,6 @@
     replace: '# \1'
   become: true
 
-
 - name: Get / rootpath  mounted Source device
   shell: mount |grep -E "\s/\s"|awk '{print $3}'
   register: rootdevice
@@ -28,6 +27,7 @@
   check_mode: true
 - debug:
     msg: "Validate the / mount output: {{ rootdevice.stdout }}"
+    verbosity: 1
   check_mode: true
 
 - name: Add mount noatime options for /
@@ -47,6 +47,7 @@
   ignore_errors: true
 - debug:
     msg: "{{ noatime }}"
+    verbosity: 1
 - name: '/etc/fstab: Set opt "noatime" for mount point /'
   lineinfile:
     path: /etc/fstab
@@ -59,6 +60,7 @@
   when: noatime.stdout == ""
 - debug:
     msg: "{{ fstab }}"
+    verbosity: 1
 
 - name: 'If / changed, remount'
   command: 'mount -o remount /'
@@ -68,6 +70,7 @@
   register: mount
 - debug:
     msg: "{{ mount }}"
+    verbosity: 1
 
 - name: Restore /etc/fstab in case remount fails.
   ansible.builtin.copy:
@@ -77,9 +80,9 @@
   when: mount.stdout| default("")  != "" and mount.skipped == false
   become: true
   register: restore
-
 - debug:
     msg: "{{ restore }}"
+    verbosity: 1
 
 - name: Checking GRUB cmdline for mitigations=off options
   shell: grep -E '^GRUB_CMDLINE_LINUX=' /etc/default/grub| { grep  "mitigations=off" || true; }
@@ -88,7 +91,7 @@
   become: true
 - debug:
     msg: "{{ grub_cfg_grep }}"
-
+    verbosity: 1
 
 - name: Configuring GRUB cmdline to add mitigations=off if need be
   replace:
@@ -103,16 +106,13 @@
   when: inventory_hostname in groups["baremetal_nodes"] and  (grub_cfg_grep.stdout == '')
   become: true
 
-- name: reboot if we need it
-  shell: sleep 2 && shutdown -r now "Ansible updates triggered"
-  async: 1
-  poll: 0
-  ignore_errors: true
+- name: Reboot if baremetal and GRUB options changed
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 60
+    test_command: whoami
   when: inventory_hostname in groups["baremetal_nodes"] and (grub_cfg_grep.stdout == '')
   become: true
-
-# - name: waiting for server to come back
-#   local_action: wait_for host={{ansible_fqdn}} state=started timeout=600 delay=15
-#   when: ("'baremetal_nodes' in group_names")  and (grub_cfg_grep.stdout == '0')
-#   become: true
-

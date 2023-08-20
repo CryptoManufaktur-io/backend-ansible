@@ -31,7 +31,7 @@
   ansible.builtin.template:
     src: custom-prom.yml.j2
     dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
-  when: item.value.prom_environment is defined
+  when: item.value.prom_cluster is defined
 
 - name: Deploy custom-lokiurl.yml file
   ansible.builtin.template:

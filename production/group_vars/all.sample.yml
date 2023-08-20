@@ -1,5 +1,11 @@
 # Variables that apply to all production hosts.
 
+prom_url: https://mimir.example.com/api/v1/push
+loki_url: https://loki.example.com/loki/api/v1/push
+prom_cf_id: cloudflare-zerotrust-token.access
+prom_cf_secret: cloudflare-zerotrust-secret
+
+
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
 upgrades_EMAIL_TO: user@example.com
@@ -14,6 +20,8 @@ infra_bastion_hostname: bastion.example.com
 infra_bastion_backup_hostname: bastion-backup.example.com
 bastion_username: jdoe
 ssh_keys_path: ~/.ssh
+ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
+ansible_ssh_private_key_file: "{{ ssh_keys_path }}/mykey.pem"
 
 ufw:
   allow:

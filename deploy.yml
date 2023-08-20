@@ -25,7 +25,7 @@
   tasks:
     - name: Combine host and group repos into a single variable
       set_fact:
-        repos: "{{ host_repos | combine(group_repos, recursive=true) }}"
+        repos: "{{ (host_repos | default({})) | combine(group_repos | default({}), recursive=true) }}"
 
     - name: Loop through repos and set env variables
       include_role:
@@ -35,3 +35,4 @@
         loop_var: item
       vars:
         repo_name: "{{ item.key }}"
+    when: repos is defined and repos | length > 0

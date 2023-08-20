@@ -1,0 +1,37 @@
+---
+- name: Main playbook that configures Linux and deploys chain repos
+  hosts: all
+  gather_facts: false
+  roles:
+    - base/update_apt
+    - role: base/bastion_ssh_only
+      when: inventory_hostname in groups["baremetal_nodes"]
+    - base/msmtp
+    - role: base/docker
+      tags:
+        - docker
+    - base/vimrc
+    - base/set_hostname
+    - role: base/dockerufw
+      when: inventory_hostname in groups["baremetal_nodes"]
+    - role: base/ufw
+      when: inventory_hostname in groups["baremetal_nodes"]
+    - base/upgrades
+    - role: base/diskspace-crontab
+      tags:
+        - diskspace-crontab
+    - base/performance
+
+  tasks:
+    - name: Combine host and group repos into a single variable
+      set_fact:
+        repos: "{{ host_repos | combine(group_repos, recursive=true) }}"
+
+    - name: Loop through repos and set env variables
+      include_role:
+        name: apps/deployrepo
+      loop: "{{ repos | dict2items }}"
+      loop_control:
+        loop_var: item
+      vars:
+        repo_name: "{{ item.key }}"

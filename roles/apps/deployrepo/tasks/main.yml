@@ -1,0 +1,45 @@
+---
+- name: clone repo {{ repo_name }}
+  ansible.builtin.git:
+    repo: "{{ item.value.repo_url }}"
+    dest: "~/{{ item.value.clone_dir }}"
+    version: main
+
+- name: Check if .env file exists for {{ repo_name }}
+  ansible.builtin.stat:
+    path: "~/{{ item.value.clone_dir }}/.env"
+  register: env_file_status
+
+- name: Create .env file as needed for {{ repo_name }}
+  ansible.builtin.copy:
+    src: "~/{{ item.value.clone_dir }}/default.env"
+    dest: "~/{{item.value.clone_dir }}/.env"
+    remote_src: yes
+  when: not env_file_status.stat.exists
+
+- name: Set variables for {{ repo_name }}
+  ansible.builtin.lineinfile:
+    path: "~/{{ item.value.clone_dir }}/.env"
+    regexp: '^{{ env_var.key }}='
+    line: "{{ env_var.key }}={{ env_var.value }}"
+  loop: "{{ item.value.env_variables | dict2items }}"
+  loop_control:
+    loop_var: env_var
+  when: item.value.env_variables is defined
+
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+  when: item.value.prom_environment is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+  when: item.value.loki_url is defined
+
+- name: start node
+  ansible.builtin.shell: ./ethd up
+  args:
+    chdir: ~/{{ item.value.clone_dir }}

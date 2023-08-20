@@ -37,7 +37,7 @@
   ansible.builtin.template:
     src: custom-lokiurl.yml.j2
     dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
-  when: item.value.loki_url is defined
+  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true
 
 - name: start node
   ansible.builtin.shell: ./ethd up

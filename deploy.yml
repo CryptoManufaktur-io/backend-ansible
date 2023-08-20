@@ -5,7 +5,7 @@
   roles:
     - base/update_apt
     - role: base/bastion_ssh_only
-      when: inventory_hostname in groups["baremetal_nodes"]
+      when: inventory_hostname in groups["baremetal_nodes"] and "'infra_bastion_hostname' in ansible_ssh_extra_args"
     - base/msmtp
     - role: base/docker
       tags:
@@ -25,9 +25,9 @@
   tasks:
     - name: Combine host and group repos into a single variable
       set_fact:
-        repos: "{{ (host_repos | default({})) | combine(group_repos | default({}), recursive=true) }}"
+        repos: "{{ (host_repo_vars | default({})) | combine(group_repo_vars | default({}), recursive=true) }}"
 
-    - name: Loop through repos and set env variables
+    - name: Loop through repos and deploy
       include_role:
         name: apps/deployrepo
       loop: "{{ repos | dict2items }}"
@@ -35,4 +35,4 @@
         loop_var: item
       vars:
         repo_name: "{{ item.key }}"
-    when: repos is defined and repos | length > 0
+      when: repos is defined and repos | length > 0

@@ -13,11 +13,15 @@ Ansible scripts for linux hosts.
 4. Run ansible playbook:
 
       ```shell
-      ansible-playbook -i production/inventory.yml site.yml
+      ansible-playbook -i production/inventory.yml deploy.yml
       ```
 
 ## Playbooks
 
+- `deploy.yml`: Set up a new server, optionally with repos like traefik and Eth Docker
+- `update.yml`: Update all repos on a server, or a specific repo by name by passing -e "repo_name=myrepo"
+
+Older playbooks that will be sunset:
 - `site.yml`: Sets up all new servers with bastion host SSH access only and basic software like Docker, etc.
 - `node.yml`: Deploys RPC nodes using [eth-docker](https://github.com/eth-educators/eth-docker).
 
@@ -26,11 +30,11 @@ Ansible scripts for linux hosts.
 The `--limit` argument allows you to target a specific host from the inventory.
 
 ```shell
-ansible-playbook -i production/inventory.yml --limit=mytarget.example.com site.yml
+ansible-playbook -i production/inventory.yml --limit=mytarget.example.com deploy.yml
 ```
 
 If you want to check what hosts have been selected by the filter, you can add the `--list-hosts` argument.
 
 ```shell
-ansible-playbook -i production/inventory.yml --limit=mytarget.example.com --list-hosts site.yml
+ansible-playbook -i production/inventory.yml --limit=mytarget.example.com --list-hosts deploy.yml
 ```

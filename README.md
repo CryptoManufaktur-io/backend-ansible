@@ -20,6 +20,7 @@ Ansible scripts for Linux hosts running Eth Docker patterned repos in Docker
 
 - `deploy.yml`: Set up a new server, optionally with repos like traefik and Eth Docker
 - `update.yml`: Update all repos on a server, or a specific repo by name by passing -e "repo=myrepo"
+- `bookworm.yml`: Update a Debian 11 "bullseye" server to Debian 12 "bookworm" 
 
 Older playbooks that will be sunset:
 - `site.yml`: Sets up all new servers with bastion host SSH access only and basic software like Docker, etc.

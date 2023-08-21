@@ -1,0 +1,22 @@
+---
+- name: Update repos
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Combine host and group repos into a single variable
+      set_fact:
+        repos: "{{ (host_repo_vars | default({})) | combine(group_repo_vars | default({}), recursive=true) }}"
+
+    - name: Loop through repos and update
+      include_role:
+        name: apps/updaterepo
+      loop: "{{ repos | dict2items }}"
+      loop_control:
+        loop_var: item
+      vars:
+        repo_name: "{{ item.key }}"
+      when:
+        - repos is defined
+        - repos | length > 0
+        - (repo is not defined) or (repo == item.key)

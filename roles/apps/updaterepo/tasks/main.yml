@@ -1,0 +1,94 @@
+---
+- name: Set variables for {{ repo_name }}
+  ansible.builtin.lineinfile:
+    path: "~/{{ item.value.clone_dir }}/.env"
+    regexp: '^{{ env_var.key }}='
+    line: "{{ env_var.key }}={{ env_var.value }}"
+  loop: "{{ item.value.env_variables | dict2items }}"
+  loop_control:
+    loop_var: env_var
+  when: item.value.env_variables is defined
+
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+  when: item.value.prom_cluster is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+
+- name: update node software
+  ansible.builtin.shell: ./ethd update
+  args:
+    chdir: ~/{{ item.value.clone_dir }}
+    executable: /bin/bash
+
+- name: restart changed software
+  ansible.builtin.shell: ./ethd up
+  args:
+    chdir: ~/{{ item.value.clone_dir }}
+    executable: /bin/bash
+  register: up_output
+
+- name: Result of ./ethd up
+  debug:
+    var: up_output.stderr_lines
+
+- name: Wait for the Docker container to stabilize
+  pause:
+    seconds: 30
+
+- name: Get execution container info
+  docker_container_info:
+    name: "{{ item.value.clone_dir }}-execution-1" 
+  register: execution_info
+
+- name: Get consensus  container info
+  docker_container_info:
+    name: "{{ item.value.clone_dir }}-consensus-1"
+  register: consensus_info
+
+- name: Pretty-print consensus JSON
+  shell: echo '{{ consensus_info | to_nice_json }}'
+  register: consensus_json
+
+- name: Print consensus info
+  debug:
+    msg: "{{ consensus_json.stdout }}"
+    verbosity: 1
+
+- name: Pretty-print execution JSON
+  shell: echo '{{ execution_info | to_nice_json }}'
+  register: execution_json
+
+- name: Print execution info
+  debug:
+    msg: "{{ execution_json.stdout }}"
+    verbosity: 1
+
+- name: Fail if consensus or execution container is not running
+  fail:
+    msg: "Either consensus or execution is not running"
+  when: >
+    consensus_info.exists and
+    (
+      not consensus_info.container.State.Running or
+      consensus_info.container.State.ExitCode != 0 or
+      not execution_info.container.State.Running or
+      execution_info.container.State.ExitCode != 0
+    )
+
+- name: Get version
+  ansible.builtin.shell: ./ethd version
+  args:
+    chdir: ~/{{ item.value.clone_dir }}
+    executable: /bin/bash
+  register: version_output
+
+- name: ./ethd version output
+  debug:
+    var: version_output.stdout_lines

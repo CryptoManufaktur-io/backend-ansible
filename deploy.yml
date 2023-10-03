@@ -25,7 +25,7 @@
   tasks:
     - name: Combine host and group repos into a single variable
       set_fact:
-        repos: "{{ (host_repo_vars | default({})) | combine(group_repo_vars | default({}), recursive=true) }}"
+        repos: "{{ (group_repo_vars | default({})) | combine(host_repo_vars | default({}), recursive=true) }}"
 
     - name: Loop through repos and deploy
       include_role:

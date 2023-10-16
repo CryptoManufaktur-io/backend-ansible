@@ -12,6 +12,7 @@
     - cron
     - git
     - dbus
+    - python3-requests
     update_cache: yes
     cache_valid_time: 86400
   become: true
@@ -21,8 +22,3 @@
     name: dbus.socket
     state: started
   become: true
-
-- name: Install requests for Python3
-  pip:
-    name: requests
-    executable: pip3

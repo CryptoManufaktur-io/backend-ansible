@@ -1,8 +1,9 @@
 ---
 - name: Install requests for Python3
-  pip:
-    name: requests
-    executable: pip3
+  apt:
+    name: python3-requests
+    update_cache: yes
+  become:yes
 
 - name: Set variables for {{ repo_name }}
   ansible.builtin.lineinfile:

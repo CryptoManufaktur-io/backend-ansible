@@ -21,3 +21,8 @@
     name: dbus.socket
     state: started
   become: true
+
+- name: Install requests for Python3
+  pip:
+    name: requests
+    executable: pip3

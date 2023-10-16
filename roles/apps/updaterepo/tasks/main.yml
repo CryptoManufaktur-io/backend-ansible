@@ -3,7 +3,7 @@
   apt:
     name: python3-requests
     update_cache: yes
-  become:yes
+  become: yes
 
 - name: Set variables for {{ repo_name }}
   ansible.builtin.lineinfile:

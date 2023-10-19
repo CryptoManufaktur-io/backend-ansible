@@ -1,10 +1,4 @@
 ---
-- name: Install requests for Python3
-  apt:
-    name: python3-requests
-    update_cache: yes
-  become: yes
-
 - name: Set variables for {{ repo_name }}
   ansible.builtin.lineinfile:
     path: "~/{{ item.value.clone_dir }}/.env"

@@ -26,6 +26,11 @@
   args:
     chdir: ~/{{ item.value.clone_dir }}
     executable: /bin/bash
+  register: update_output
+
+- name: Result of ./ethd update
+  debug:
+    var: update_output.stdout_lines
 
 - name: restart changed software
   ansible.builtin.shell: ./ethd up

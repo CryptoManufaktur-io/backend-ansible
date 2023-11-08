@@ -1,5 +1,5 @@
 ---
-- name: Update repos
+- name: Deploy repos
   hosts: all
   gather_facts: false
 
@@ -8,9 +8,9 @@
       set_fact:
         repos: "{{ (group_repo_vars | default({})) | combine(host_repo_vars | default({}), recursive=true) }}"
 
-    - name: Loop through repos and update
+    - name: Loop through repos and deploy
       include_role:
-        name: apps/updaterepo
+        name: apps/deployrepo
       loop: "{{ repos | dict2items }}"
       loop_control:
         loop_var: item

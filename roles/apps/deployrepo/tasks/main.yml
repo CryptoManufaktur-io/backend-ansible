@@ -1,5 +1,14 @@
 ---
-- name: clone repo {{ repo_name }}
+- name: Check if repo exists in ~/{{ item.value.clone_dir }}
+  stat:
+    path: "~/{{ item.value.clone_dir }}"
+  register: clone_dir_stat
+
+- name: Skip if repo already exists
+  meta: end_role
+  when: clone_dir_stat.stat.exists
+
+- name: Clone repo {{ repo_name }}
   ansible.builtin.git:
     repo: "{{ item.value.repo_url }}"
     dest: "~/{{ item.value.clone_dir }}"

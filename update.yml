@@ -8,6 +8,16 @@
       set_fact:
         repos: "{{ (group_repo_vars | default({})) | combine(host_repo_vars | default({}), recursive=true) }}"
 
+    - name: Loop through repos and deploy
+      include_role:
+        name: apps/deployrepo
+      loop: "{{ repos | dict2items }}"
+      loop_control:
+        loop_var: item
+      vars:
+        repo_name: "{{ item.key }}"
+      when: repos is defined and repos | length > 0
+
     - name: Loop through repos and update
       include_role:
         name: apps/updaterepo

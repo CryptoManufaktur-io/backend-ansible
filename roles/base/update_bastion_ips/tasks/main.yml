@@ -1,0 +1,20 @@
+---
+- name: Allow SSH traffic from the infra bastion host
+  ufw:
+    rule: allow
+    port: "22"
+    proto: "tcp"
+    comment: "Allow SSH from Bastion Host Elastic IP"
+    from: "{{infra_bastion_elastic}}"
+    insert: 1
+  become: true
+
+- name: Allow SSH traffic from the backup infra bastion host
+  ufw:
+    rule: allow
+    port: "22"
+    proto: "tcp"
+    comment: "Allow SSH from Backup Bastion Host Elastic IP"
+    from: "{{infra_bastion_backup_elastic}}"
+    insert: 2
+  become: true

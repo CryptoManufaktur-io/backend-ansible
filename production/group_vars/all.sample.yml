@@ -16,6 +16,8 @@ upgrades_REBOOT_AT: -02:00
 
 infra_bastion: 192.168.1.10
 infra_bastion_backup: 192.168.1.11
+infra_bastion_elastic: 192.168.1.12
+infra_bastion_backup_elastic: 192.168.1.11
 infra_bastion_hostname: bastion.example.com
 infra_bastion_backup_hostname: bastion-backup.example.com
 bastion_username: jdoe

@@ -2,24 +2,12 @@
 - name: Include new bastion ips
   include_vars: "{{inventory_dir}}/group_vars/new-bastion-ips.yml"
 
-# Main bastion
-- name: Get rule number for main bastion
-  shell: "ufw status numbered | grep {{old_infra_bastion}} | awk -F '[][]' '{print $2}'"
+- name: Get rule number for bastion
+  shell: "ufw status numbered | grep {{ change_bastion_ips['old'] }} | awk -F '[][]' '{print $2}'"
   register: ufw_rule_number
   become: true
 
-- name: Replace allow old main bastion IP with new one
-  shell: "ufw delete allow from {{old_infra_bastion}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion}} to any port 22 proto tcp comment 'Allow SSH from  Bastion Host'"
-  become: true
-  when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')
-
-# Backup bastion
-- name: Get rule number for backup bastion
-  shell: "ufw status numbered | grep {{old_infra_bastion_backup}} | awk -F '[][]' '{print $2}'"
-  register: ufw_rule_number
-  become: true
-
-- name: Replace allow old backup bastion IP with new one
-  shell: "ufw delete allow from {{old_infra_bastion_backup}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion_backup}} to any port 22 proto tcp comment 'Allow SSH from Backup Bastion Host'"
+- name: Replace allow old bastion IP with new one
+  shell: "ufw delete allow from {{ change_bastion_ips['old'] }} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{ change_bastion_ips['new'] }} to any port 22 proto tcp comment '{{ change_bastion_ips['comment'] }}'"
   become: true
   when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')

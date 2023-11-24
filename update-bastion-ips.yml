@@ -1,5 +1,5 @@
 ---
-- name: Add Bastion Elastic IPs
+- name: Change bastion Ips by update from old to new
   hosts: all
   serial: 1
   gather_facts: false

@@ -45,7 +45,7 @@
   delegate_to: localhost
   become: false
   register: ssh_output
-  ignore_errors: yes
+  ignore_errors: true
   failed_when: ssh_output.failed == true
   changed_when: false
 
@@ -54,6 +54,6 @@
   delegate_to: localhost
   become: false
   register: ssh_output
-  ignore_errors: yes
+  ignore_errors: true
   failed_when: ssh_output.failed == true
   changed_when: false

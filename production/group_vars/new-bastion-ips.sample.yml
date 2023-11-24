@@ -1,0 +1,6 @@
+old_infra_bastion: "{{infra_bastion}}"
+old_infra_bastion_backup: "{{infra_bastion_backup}}"
+
+new_infra_bastion: 192.168.1.14
+new_infra_bastion_backup: 192.168.1.15
+

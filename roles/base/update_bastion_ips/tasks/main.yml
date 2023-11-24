@@ -8,10 +8,10 @@
   register: ufw_rule_number
   become: true
 
-# - name: Replace allow old main bastion IP with new one
-#   shell: "ufw delete allow from {{old_infra_bastion}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion}} to any port 22 proto tcp comment 'Allow SSH from  Bastion Host'"
-#   become: true
-#   when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')
+- name: Replace allow old main bastion IP with new one
+  shell: "ufw delete allow from {{old_infra_bastion}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion}} to any port 22 proto tcp comment 'Allow SSH from  Bastion Host'"
+  become: true
+  when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')
 
 # Backup bastion
 - name: Get rule number for backup bastion
@@ -19,7 +19,7 @@
   register: ufw_rule_number
   become: true
 
-# - name: Replace allow old backup bastion IP with new one
-#   shell: "ufw delete allow from {{old_infra_bastion_backup}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion_backup}} to any port 22 proto tcp comment 'Allow SSH from Backup Bastion Host'"
-#   become: true
-#   when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')
+- name: Replace allow old backup bastion IP with new one
+  shell: "ufw delete allow from {{old_infra_bastion_backup}} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{new_infra_bastion_backup}} to any port 22 proto tcp comment 'Allow SSH from Backup Bastion Host'"
+  become: true
+  when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')

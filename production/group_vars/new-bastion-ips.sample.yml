@@ -1,0 +1,11 @@
+# Start changing backup bastion ip
+change_bastion_ips:
+  old: "{{ infra_bastion_backup }}"
+  new: 192.168.1.14
+  comment: Allow SSH from Backup Bastion Host
+
+# Then uncomment and Change main bastion ip
+# change_bastion_ips:
+#   old: "{{ infra_bastion }}"
+#   new: 192.168.1.15
+#   comment: Allow SSH from Bastion Host

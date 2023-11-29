@@ -1,20 +1,13 @@
 ---
-- name: Allow SSH traffic from the infra bastion host
-  ufw:
-    rule: allow
-    port: "22"
-    proto: "tcp"
-    comment: "Allow SSH from Bastion Host Elastic IP"
-    from: "{{infra_bastion_elastic}}"
-    insert: 1
+- name: Include new bastion ips
+  include_vars: "{{inventory_dir}}/group_vars/new-bastion-ips.yml"
+
+- name: Get rule number for bastion
+  shell: "ufw status numbered | grep {{ change_bastion_ips['old'] }} | awk -F '[][]' '{print $2}'"
+  register: ufw_rule_number
   become: true
 
-- name: Allow SSH traffic from the backup infra bastion host
-  ufw:
-    rule: allow
-    port: "22"
-    proto: "tcp"
-    comment: "Allow SSH from Backup Bastion Host Elastic IP"
-    from: "{{infra_bastion_backup_elastic}}"
-    insert: 2
+- name: Replace allow old bastion IP with new one
+  shell: "ufw delete allow from {{ change_bastion_ips['old'] }} to any port 22 proto tcp && ufw insert {{ ufw_rule_number.stdout | regex_replace(' ', '') }} allow from {{ change_bastion_ips['new'] }} to any port 22 proto tcp comment '{{ change_bastion_ips['comment'] }}'"
   become: true
+  when: ufw_rule_number.stdout | regex_replace(' ', '') is regex('^[0-9]+$')

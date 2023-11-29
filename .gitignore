@@ -1,3 +1,4 @@
 production/group_vars/all.yml
+production/group_vars/new-bastion-ips.yml
 production/inventory.yml
 .DS_Store

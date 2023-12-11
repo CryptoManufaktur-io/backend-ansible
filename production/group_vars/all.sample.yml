@@ -1,7 +1,4 @@
 # Variables that apply to all production hosts.
-traefik_acme_email: hello@example.com
-traefik_cf_api_token: "1005377c89604cbc9211680fff7fb78b"
-traefik_cf_email: hello@example.com
 
 prom_url: https://mimir.example.com/api/v1/push
 loki_url: https://loki.example.com/loki/api/v1/push
@@ -12,11 +9,9 @@ prom_cf_secret: cloudflare-zerotrust-secret
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
 upgrades_EMAIL_TO: user@example.com
-upgrades_SSMTP_CONF: /etc/ssmtp/ssmtp.conf
 upgrades_EMAIL: user@example.com
 upgrades_EPW: password
-upgrades_MAILSRV: smtp.gmail.com
-upgrades_MAILSRV_PORT: 587
+upgrades_MAILSRV: smtp.gmail.com:587
 upgrades_REBOOT_AT: -02:00
 
 infra_bastion: 192.168.1.10
@@ -29,17 +24,6 @@ bastion_username: jdoe
 ssh_keys_path: ~/.ssh
 ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
 ansible_ssh_private_key_file: "{{ ssh_keys_path }}/mykey.pem"
-
-grafana_url: https://grafana.example.com
-grafana_alert_id: 4ea70158-e83e-41be-a09f-75dff5537ed9
-grafana_data_source_id: 680fff7fb78b
-
-# Prometheus remote write.
-prom_remote_write_url: https://mimir.example.com/api/v1/push
-prom_remote_write_headers:
-  "CF-Access-Client-Id": ""
-  "CF-Access-Client-Secret": ""
-  "X-Scope-OrgID": "primary"
 
 ufw:
   allow:

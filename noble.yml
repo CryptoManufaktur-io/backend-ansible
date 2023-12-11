@@ -1,0 +1,7 @@
+---
+- name: Upgrade to Ubuntu Noble Numbat
+  hosts: all
+  serial: 1
+  gather_facts: false
+  roles:
+    - base/upgrade_noble

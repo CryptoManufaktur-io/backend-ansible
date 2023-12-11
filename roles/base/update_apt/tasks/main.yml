@@ -10,6 +10,15 @@
     - needrestart
     - ufw
     - cron
+    - git
+    - dbus
+    - python3-requests
     update_cache: yes
     cache_valid_time: 86400
+  become: true
+
+- name: Start service dbus, if not started
+  ansible.builtin.service:
+    name: dbus.socket
+    state: started
   become: true

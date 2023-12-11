@@ -2,8 +2,8 @@ global:
   scrape_interval:     15s
   evaluation_interval: 15s
   external_labels:
-    cluster: {{ prom_cluster }}
-    environment: {{ prom_environment }}
+    cluster: {{ item.value.prom_cluster }}
+    environment: {{ item.value.prom_environment }}
 
 remote_write:
   - url: {{ prom_url }}
@@ -11,4 +11,3 @@ remote_write:
       "CF-Access-Client-Id": "{{ prom_cf_id }}"
       "CF-Access-Client-Secret": "{{ prom_cf_secret }}"
       "X-Scope-OrgID": "primary"
-

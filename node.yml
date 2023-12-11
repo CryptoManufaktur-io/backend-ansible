@@ -1,6 +1,0 @@
----
-- name: Deploy blockchain node software
-  hosts: all
-  gather_facts: false
-  roles:
-    - apps/deploynodes

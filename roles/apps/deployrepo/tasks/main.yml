@@ -1,0 +1,80 @@
+---
+- name: Check if repo exists in ~/{{ item.value.clone_dir }}
+  stat:
+    path: "~/{{ item.value.clone_dir }}"
+  register: clone_dir_stat
+
+- name: Clone repo {{ repo_name }}
+  ansible.builtin.git:
+    repo: "{{ item.value.repo_url }}"
+    dest: "~/{{ item.value.clone_dir }}"
+    version: main
+  when: not clone_dir_stat.stat.exists
+
+- name: Install rsync
+  apt:
+    name:
+    - rsync
+    update_cache: yes
+    cache_valid_time: 86400
+  become: true
+  when:
+    - item.value.config_src is defined
+    - not clone_dir_stat.stat.exists
+
+- name: Synchronize config directory
+  ansible.builtin.synchronize:
+    src: "{{ item.value.config_src }}/"
+    dest: "~/{{ item.value.clone_dir }}/config"
+    use_ssh_args: yes
+  when:
+    - item.value.config_src is defined
+    - not clone_dir_stat.stat.exists
+
+- name: Check if .env file exists for {{ repo_name }}
+  ansible.builtin.stat:
+    path: "~/{{ item.value.clone_dir }}/.env"
+  register: env_file_status
+
+- name: Create .env file as needed for {{ repo_name }}
+  ansible.builtin.copy:
+    src: "~/{{ item.value.clone_dir }}/default.env"
+    dest: "~/{{item.value.clone_dir }}/.env"
+    remote_src: yes
+  when: not env_file_status.stat.exists
+
+- name: Set variables for {{ repo_name }}
+  ansible.builtin.lineinfile:
+    path: "~/{{ item.value.clone_dir }}/.env"
+    regexp: '^{{ env_var.key }}='
+    line: "{{ env_var.key }}={{ env_var.value }}"
+  loop: "{{ item.value.env_variables | dict2items }}"
+  loop_control:
+    loop_var: env_var
+  when: item.value.env_variables is defined
+
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: custom-prom.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+  when: item.value.prom_cluster is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: custom-lokiurl.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+
+- name: start node
+  ansible.builtin.shell: ./ethd up
+  args:
+    chdir: ~/{{ item.value.clone_dir }}
+
+- name: create dirk wallet
+  ansible.builtin.shell: docker compose run --rm create-wallet && docker compose down && docker compose up -d && touch ~/{{ item.value.clone_dir }}/.wallet_created
+  args:
+    chdir: ~/{{ item.value.clone_dir }}
+    creates: ~/{{ item.value.clone_dir }}/.wallet_created
+  when:
+    - not clone_dir_stat.stat.exists
+    - repo_name == "dirk"

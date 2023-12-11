@@ -4,9 +4,7 @@ all:
     lonely-a.example.com:
       ansible_host: 2.2.3.4
       upgrades_REBOOT_AT: "12:00"
-      ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
       ansible_user: debian
-      ansible_ssh_private_key_file: "{{ ssh_keys_path }}/id_rsa"
 
   children:
     testing:
@@ -18,20 +16,25 @@ all:
           ansible_host: 1.2.3.5
           upgrades_REBOOT_AT: "12:30"
       vars:
-        ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
         ansible_user: debian
-        ansible_ssh_private_key_file: "{{ ssh_keys_path }}/id_rsa"
 
     baremetal_nodes:
       hosts:
         baremetal-test.example.com:
           ansible_host: 1.2.3.6
-          ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
           ansible_user: debian
-          ansible_ssh_private_key_file: "{{ ssh_keys_path }}/id_rsa"
           upgrades_REBOOT_AT: "01:00"
-          prom_cluster: another-test-a
-          prom_environment: another-test
+          host_repo_vars:
+            traefik:
+              env_variables:
+                DDNS_SUBDOMAIN: "another-test-a"
+                COMPOSE_FILE: "traefik-cf.yml:prometheus.yml"
+                DOMAIN: "example.com"
+                ACME_EMAIL: "engineering@example.com"
+                CF_DNS_API_TOKEN: "suchSecureVeryTokenWow"
+                DDNS_PROXY: "false"
+              prom_cluster: another-test-a
+              prom_environment: another-test
 
       children:
         eth_main:
@@ -39,42 +42,47 @@ all:
             eth-main-a.example.com:
               ansible_host: 3.4.5.6
               upgrades_REBOOT_AT: "14:00"
-              env_variables:
-                - { key: "COMPOSE_FILE", value: "teku-cl-only.yml:besu.yml:grafana-cloud.yml:ext-network.yml" }
-                - { key: "CL_HOST", value: "eth-maincl-a" }
-              traefik_env_variables:
-                - { key: "DDNS_SUBDOMAIN", value: "eth-main-a" }
-              prom_cluster: eth-main-a
+              host_repo_vars:
+                traefik:
+                  env_variables:
+                    DDNS_SUBDOMAIN: "eth-main-a"
+                eth:
+                  env_variables:
+                    COMPOSE_FILE: "teku-cl-only.yml:besu.yml:grafana-cloud.yml:ext-network.yml
+                    CL_HOST: "eth-maincl-a"
+                  prom_cluster: eth-main-a
             eth-main-b.example.com:
               ansible_host: 3.4.5.7
               upgrades_REBOOT_AT: "14:30"
-              env_variables:
-                - { key: "COMPOSE_FILE", value: "nimbus-cl-only.yml:nethermind.yml:grafana-cloud.yml:ext-network.yml" }
-                - { key: "CL_HOST", value: "eth-maincl-b" }
-              traefik_env_variables:
-                - { key: "DDNS_SUBDOMAIN", value: "eth-main-b" }
-              prom_cluster: eth-main-b
+              host_repo_vars:
+                traefik:
+                  env_variables:
+                    DDNS_SUBDOMAIN: "eth-main-b"
+                eth:
+                  env_variables:
+                    COMPOSE_FILE: "lodestar-cl-only.yml:nethermind.yml:grafana-cloud.yml:ext-network.yml
+                    CL_HOST: "eth-maincl-b"
+                  prom_cluster: eth-main-b
           vars:
-            repo_url: https://github.com/eth-educators/eth-docker.git
-            clone_dir: eth-main
-            group_env_variables:
-              - { key: "FEE_RECIPIENT", value: "0x0000000000000000000000000000000000000000" }
-              - { key: "NETWORK", value: "mainnet" }
-              - { key: "DOMAIN", value: "example.com" }
-              - { key: "RAPID_SYNC_URL", value: "https://beaconstate.info" }
-              - { key: "MEV_BOOST", value: "true" }
-              - { key: "MEV_RELAYS", value: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com,https://0x9000009807ed12c1f08bf4e81c6da3ba8e3fc3d953898ce0102433094e5f22f21102ec057841fcb81978ed1ea0fa8246@builder-relay-mainnet.blocknative.com,https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money,https://0xa15b52576bcbf1072f4a011c0f99f9fb6c66f3e1ff321f11f461d15e31b1cb359caa092c71bbded0bae5b5ea401aab7e@aestus.live,https://0xa7ab7a996c8584251c8f925da3170bdfd6ebc75d50f5ddc4050a6fdc77f2a3b5fce2cc750d0865e05d7228af97d69561@agnostic-relay.net" }
-            traefik_group_env_variables:
-              - { key: "COMPOSE_FILE", value: "traefik-cf.yml" }
-              - { key: "DOMAIN", value: "example.com" }
-              - { key: "ACME_EMAIL", value: "user@example.com" }
-              - { key: "CF_DNS_API_TOKEN", value: "suchsecretmuchsecurewow" }
-              - { key: "DDNS_PROXY", value: "false" }
-            prom_environment: myethers
-            prom_url: https://mimir.example.com/api/v1/push
-            loki_url: https://loki.example.com/loki/api/v1/push
-            prom_cf_id: clouflare_access_id
-            prom_cf_secret: cloudflare_access_secret
-            ansible_ssh_extra_args: "-o StrictHostKeyChecking=accept-new -o ProxyCommand=\"bash -c 'cloudflared access ssh-gen --hostname {{ infra_bastion_hostname }}; ssh -W %h:%p {{ bastion_username }}@cfpipe-{{ infra_bastion_hostname }}'\""
+            group_repo_vars:
+              traefik:
+                repo_url: https://github.com/CryptoManufaktur-io/base-docker-environment
+                clone_dir: traefik
+                env_variables:
+                  COMPOSE_FILE: "traefik-cf.yml"
+                  DOMAIN: "example.com"
+                  ACME_EMAIL: "engineering@example.com"
+                  CF_DNS_API_TOKEN: "suchSecureVeryTokenWow"
+                  DDNS_PROXY: "false"
+              eth:
+                repo_url: https://github.com/eth-educators/eth-docker.git
+                clone_dir: eth-main
+                prom_environment: myethers
+                env_variables:
+                  FEE_RECIPIENT: "0x0000000000000000000000000000000000000000"
+                  NETWORK: "mainnet"
+                  DOMAIN: "example.com"
+                  RAPID_SYNC_URL: "https://beaconstate.info"
+                  MEV_BOOST: "true"
+                  MEV_RELAYS: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com,https://0x9000009807ed12c1f08bf4e81c6da3ba8e3fc3d953898ce0102433094e5f22f21102ec057841fcb81978ed1ea0fa8246@builder-relay-mainnet.blocknative.com,https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money,https://0xa15b52576bcbf1072f4a011c0f99f9fb6c66f3e1ff321f11f461d15e31b1cb359caa092c71bbded0bae5b5ea401aab7e@aestus.live,https://0xa7ab7a996c8584251c8f925da3170bdfd6ebc75d50f5ddc4050a6fdc77f2a3b5fce2cc750d0865e05d7228af97d69561@agnostic-relay.net"
             ansible_user: debian
-            ansible_ssh_private_key_file: "{{ ssh_keys_path }}/id_rsa"

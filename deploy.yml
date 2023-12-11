@@ -21,7 +21,6 @@
       tags:
         - diskspace-crontab
     - base/performance
-    - base/alerting
 
   tasks:
     - name: Combine host and group repos into a single variable

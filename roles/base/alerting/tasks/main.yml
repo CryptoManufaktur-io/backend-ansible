@@ -1,0 +1,9 @@
+---
+- name: Generate new query for server down alert
+  command: ./write-alert.sh {{ inventory_file }} {{ grafana_url }} {{ grafana_alert_id }} {{ grafana_data_source_id }}
+  delegate_to: localhost
+  become: false
+
+- debug:
+    msg:
+      - "A browser tab has been opened with both the server down alert, and the new query to use. Make sure to update the alert."

@@ -1,0 +1,6 @@
+---
+    - name: Generate alerting playbook.
+      hosts: all
+      gather_facts: false
+      roles:
+          - base/alerting

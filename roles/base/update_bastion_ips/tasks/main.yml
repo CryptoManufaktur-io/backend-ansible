@@ -1,20 +1,12 @@
 ---
-- name: Allow SSH traffic from the infra bastion host
-  ufw:
-    rule: allow
-    port: "22"
-    proto: "tcp"
-    comment: "Allow SSH from Bastion Host Elastic IP"
-    from: "{{infra_bastion_elastic}}"
-    insert: 1
+- name: Delete ufw rule number main
   become: true
+  shell: "ufw status numbered | grep \"18.221.164.148\" | awk -F'[][]' '{print $2}' | xargs -I {} ufw --force delete {}"
+  register: command_output
+  changed_when: "'Rule deleted' in command_output.stdout_lines"
 
-- name: Allow SSH traffic from the backup infra bastion host
-  ufw:
-    rule: allow
-    port: "22"
-    proto: "tcp"
-    comment: "Allow SSH from Backup Bastion Host Elastic IP"
-    from: "{{infra_bastion_backup_elastic}}"
-    insert: 2
+- name: Delete ufw rule number main
   become: true
+  shell: "ufw status numbered | grep \"15.223.3.129\" | awk -F'[][]' '{print $2}' | xargs -I {} ufw --force delete {}"
+  register: command_output
+  changed_when: "'Rule deleted' in command_output.stdout_lines"

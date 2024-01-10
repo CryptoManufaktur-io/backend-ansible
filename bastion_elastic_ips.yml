@@ -1,7 +1,6 @@
 ---
-- name: Add Bastion Elastic IPs
+- name: Remove old Bastion IPs
   hosts: all
-  serial: 1
   gather_facts: false
   roles:
     - role: base/update_bastion_ips

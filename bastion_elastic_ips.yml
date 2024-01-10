@@ -1,7 +1,0 @@
----
-- name: Remove old Bastion IPs
-  hosts: all
-  gather_facts: false
-  roles:
-    - role: base/update_bastion_ips
-      when: inventory_hostname in groups["baremetal_nodes"] and "'infra_bastion_hostname' in ansible_ssh_extra_args"

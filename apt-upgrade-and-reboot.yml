@@ -1,0 +1,24 @@
+---
+- name: Update APT Auto-Upgrades Configuration
+  hosts: all
+  serial: 1
+  become: yes  # To run tasks with sudo privileges
+  gather_facts: no
+
+  tasks:
+    - name: All apt packages up to date
+      apt:
+        upgrade: dist
+        update_cache: yes
+    - name: Reboot
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 60
+        test_command: whoami
+      become: yes
+    - name: Pause for 1 minute to allow node to come back into sync
+      pause:
+        minutes: 1

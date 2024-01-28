@@ -1,5 +1,5 @@
 ---
-- name: Update APT Auto-Upgrades Configuration
+- name: apt upgrade and reboot
   hosts: all
   serial: 1
   become: yes  # To run tasks with sudo privileges

@@ -70,9 +70,3 @@
 
 - name: Reset SSH connection
   meta: reset_connection
-
-- name: Add docker compose alias for current user
-  lineinfile:
-    path: "{{ user_home.stdout }}/.profile"
-    line: "alias docker-compose=\"docker compose\""
-    create: yes

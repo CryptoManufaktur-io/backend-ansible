@@ -47,24 +47,9 @@
     test_command: whoami
   when: reboot_required_file.stat.exists
   become: true
-- name: Find all 3rd-party repos
-  ansible.builtin.find:
-    paths: /etc/apt/sources.list.d
-    patterns: '*'
-    recurse: no
-  register: third_party_repos
-- name: Switch 3rd-party repos from jammy to noble
-  ansible.builtin.replace:
-    path: "{{ item.path }}"
-    regexp: 'jammy'
-    replace: 'noble'
-  loop: "{{ third_party_repos.files }}"
-  loop_control:
-    label: "{{ item.path }}"
-  become: yes
 - name: Use do-release-upgrade to move to noble
   ansible.builtin.shell:
-    cmd: do-release-upgrade -f DistUpgradeViewNonInteractive --allow-third-party
+    cmd: do-release-upgrade -d -f DistUpgradeViewNonInteractive --allow-third-party
   become: yes
 - name: Get distribution version
   setup:
@@ -83,6 +68,30 @@
     post_reboot_delay: 60
     test_command: whoami
   become: yes
-- name: Pause for 5 minutes to allow node to come back into sync
+- name: Find all repos
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns: ['*.list', '*.sources']
+    recurse: no
+  register: all_repos
+- name: Switch repos from jammy to noble
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: 'jammy'
+    replace: 'noble'
+  loop: "{{ all_repos.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become: yes
+- name: Bring in updated repos
+  apt:
+    upgrade: dist
+    update_cache: yes
+  become: yes
+- name: apt autoremove
+  apt:
+    autoremove: yes
+  become: yes
+- name: Pause for 5 minutes for staggered upgrades
   pause:
     minutes: 5

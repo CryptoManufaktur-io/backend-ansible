@@ -48,7 +48,7 @@
   become: true
 - name: Use do-release-upgrade to move to noble
   ansible.builtin.shell:
-    cmd: RELEASE_UPGRADER_ALLOW_THIRD_PARTY=1 do-release-upgrade -d -f DistUpgradeViewNonInteractive --allow-third-party
+    cmd: do-release-upgrade -f DistUpgradeViewNonInteractive --allow-third-party
   become: yes
 - name: Get distribution version
   setup:

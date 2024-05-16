@@ -1,0 +1,23 @@
+---
+- name: Add NMS prometheus and promtail endpoints
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Combine host and group repos into a single variable
+      set_fact:
+        repos: "{{ (group_repo_vars | default({})) | combine(host_repo_vars | default({}), recursive=true) }}"
+
+    - name: Loop through repos and update
+      include_role:
+        name: base/nms
+      loop: "{{ repos | dict2items }}"
+      loop_control:
+        loop_var: item
+      vars:
+        repo_name: "{{ item.key }}"
+      when:
+        - repos is defined
+        - repos | length > 0
+        - (repo is not defined) or (repo == item.key)
+        - item.value.prom_cluster is defined or (item.value.deploy_promtail is defined and item.value.deploy_promtail == true)

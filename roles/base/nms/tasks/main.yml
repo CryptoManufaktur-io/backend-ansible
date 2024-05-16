@@ -1,0 +1,29 @@
+---
+
+- name: Update custom-prom.yml file
+  blockinfile:
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+    block: "{{ lookup('template', 'custom-prom.yml.j2') }}"
+    marker: "  ##<!-- {mark} NMS Block -->"
+  when: item.value.prom_cluster is defined
+  register: prometheus_config_changed
+
+- name: Restart prometheus when config changed
+  shell: |
+    cd ~/{{ item.value.clone_dir }}
+    ./ethd restart prometheus
+  when: prometheus_config_changed.changed == true
+
+- name: Update custom-lokiurl.yml file
+  blockinfile:
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+    block: "{{ lookup('template', 'custom-lokiurl.yml.j2') }}"
+    marker: "##<!-- {mark} NMS Block -->"
+  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+  register: promtail_config_changed
+
+- name: Restart promtail when config changed
+  shell: |
+    cd ~/{{ item.value.clone_dir }}
+    ./ethd restart promtail
+  when: promtail_config_changed.changed == true

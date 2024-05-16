@@ -78,3 +78,12 @@
   when:
     - not clone_dir_stat.stat.exists
     - repo_name == "dirk"
+
+- name: Add extra prometheus scrape jobs
+  when: item.value.prom_extra_jobs is defined
+  loop: "{{ item.value.prom_extra_jobs | dict2items }}"
+  loop_control:
+    loop_var: scrape_item
+  ansible.builtin.template:
+    src: custom-extra-scrape.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/prometheus/file_sd/{{scrape_item.key}}.yml

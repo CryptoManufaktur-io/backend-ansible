@@ -2,6 +2,8 @@
 - name: Add NMS prometheus and promtail endpoints
   hosts: all
   gather_facts: false
+  strategy: free
+  serial: 20
 
   tasks:
     - name: Combine host and group repos into a single variable

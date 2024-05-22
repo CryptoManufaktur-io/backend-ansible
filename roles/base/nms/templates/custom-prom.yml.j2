@@ -3,10 +3,10 @@
       username: {{ nms_username }}
       password: {{ nms_password }}
     write_relabel_configs:
-      # Set service to job
-      - source_labels: [job]
-        target_label: service
+      # # Set service to job
+      # - source_labels: [job]
+      #   target_label: service
 
-      # Set job as cluster label
-      - source_labels: [cluster]
-        target_label: job
+      # # Set job as cluster label
+      # - source_labels: [cluster]
+      #   target_label: job

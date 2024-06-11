@@ -5,6 +5,11 @@ loki_url: https://loki.example.com/loki/api/v1/push
 prom_cf_id: cloudflare-zerotrust-token.access
 prom_cf_secret: cloudflare-zerotrust-secret
 
+nms_metrics_url: URL
+nms_logs_url: URL
+nms_username: USERNAME
+nms_password: PASSWORD
+nms_operator: CryptoManufaktur
 
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades

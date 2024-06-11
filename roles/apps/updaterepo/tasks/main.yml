@@ -97,3 +97,12 @@
 - name: ./ethd version output
   debug:
     var: version_output.stdout_lines
+
+- name: Add extra prometheus scrape jobs
+  when: item.value.prom_extra_jobs is defined
+  loop: "{{ item.value.prom_extra_jobs | dict2items }}"
+  loop_control:
+    loop_var: scrape_item
+  ansible.builtin.template:
+    src: custom-extra-scrape.yml.j2
+    dest: ~/{{ item.value.clone_dir }}/prometheus/file_sd/{{scrape_item.key}}.yml

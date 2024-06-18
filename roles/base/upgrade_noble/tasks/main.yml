@@ -67,6 +67,22 @@
     post_reboot_delay: 60
     test_command: whoami
   become: yes
+- name: Find all .distUpgrade files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns: "*.distUpgrade"
+  register: distupgrade_files
+- name: Ensure corresponding file exists
+  ansible.builtin.command: test -f "{{ item.path | regex_replace('.distUpgrade$', '') }}"
+  ignore_errors: true
+  register: check_file
+  with_items: "{{ distupgrade_files.files }}"
+  changed_when: false
+- name: Copy .distUpgrade to the corresponding file if it does not exist
+  ansible.builtin.command: cp "{{ item.item.path }}" "{{ item.item.path | regex_replace('.distUpgrade$', '') }}"
+  when: item.rc != 0
+  with_items: "{{ check_file.results }}"
+  become: yes
 - name: Find all repos
   ansible.builtin.find:
     paths: /etc/apt/sources.list.d

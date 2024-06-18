@@ -39,3 +39,16 @@ If you want to check what hosts have been selected by the filter, you can add th
 ```shell
 ansible-playbook -i production/inventory.yml --limit=mytarget.example.com --list-hosts deploy.yml
 ```
+
+### NMS
+To send metrics to NMS, a config is added to prometheus and loki. Check on `roles/base/custom_prometheus_loki` for the implementation and templates of config updates.
+
+This can be used to send metrics and logs to any other server as needed by changing the URLs in `all.yml` specifically below
+
+```yml
+nms_metrics_url:  URL
+nms_logs_url:     URL
+nms_username:     USERNAME
+nms_password:     PASSWORD
+nms_operator:     CryptoManufaktur
+```

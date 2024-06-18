@@ -1,0 +1,40 @@
+---
+- name: Deploy custom-prom.yml file
+  ansible.builtin.template:
+    src: "{{ prometheus_template }}"
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+  when: prometheus_template is defined and item.value.prom_cluster is defined
+
+- name: Deploy custom-lokiurl.yml file
+  ansible.builtin.template:
+    src: "{{ promtail_template }}"
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+  when: promtail_template is defined and item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+
+- name: Update custom-prom.yml file with NMS block
+  blockinfile:
+    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
+    block: "{{ lookup('template', nms_prometheus_template) }}"
+    marker: "  ##<!-- {mark} NMS Block -->"
+  when: nms_prometheus_template is defined and item.value.prom_cluster is defined
+  register: prometheus_config_changed
+
+- name: Restart prometheus when config changed
+  shell: |
+    cd ~/{{ item.value.clone_dir }}
+    ./ethd restart prometheus
+  when: prometheus_config_changed.changed == true
+
+- name: Update custom-lokiurl.yml file with NMS block
+  blockinfile:
+    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
+    block: "{{ lookup('template', nms_promtail_template) }}"
+    marker: "##<!-- {mark} NMS Block -->"
+  when: nms_promtail_template is defined and item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+  register: promtail_config_changed
+
+- name: Restart promtail when config changed
+  shell: |
+    cd ~/{{ item.value.clone_dir }}
+    ./ethd restart promtail
+  when: promtail_config_changed.changed == true

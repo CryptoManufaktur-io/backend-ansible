@@ -53,17 +53,13 @@
     loop_var: env_var
   when: item.value.env_variables is defined
 
-- name: Deploy custom-prom.yml file
-  ansible.builtin.template:
-    src: custom-prom.yml.j2
-    dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
-  when: item.value.prom_cluster is defined
-
-- name: Deploy custom-lokiurl.yml file
-  ansible.builtin.template:
-    src: custom-lokiurl.yml.j2
-    dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
-  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+- name: Add tasks for custom-prom.yml and custom-lokiurl.yml
+  include_tasks: "../../base/custom_prometheus_loki/tasks/main.yml"
+  vars:
+    prometheus_template: "../../base/custom_prometheus_loki/templates/custom-prom.yml.j2"
+    promtail_template: "../../base/custom_prometheus_loki/templates/custom-lokiurl.yml.j2"
+    nms_prometheus_template: "../../base/custom_prometheus_loki/templates/nms-custom-prom.yml.j2"
+    nms_promtail_template: "../../base/custom_prometheus_loki/templates/nms-custom-lokiurl.yml.j2"
 
 - name: start node
   ansible.builtin.shell: ./ethd up
@@ -85,5 +81,5 @@
   loop_control:
     loop_var: scrape_item
   ansible.builtin.template:
-    src: custom-extra-scrape.yml.j2
+    src: ../../base/custom_prometheus_loki/templates/custom-extra-scrape.yml.j2
     dest: ~/{{ item.value.clone_dir }}/prometheus/file_sd/{{scrape_item.key}}.yml

@@ -12,12 +12,14 @@
 
     - name: Loop through repos and update
       include_role:
-        name: base/nms
+        name: base/custom_prometheus_loki
       loop: "{{ repos | dict2items }}"
       loop_control:
         loop_var: item
       vars:
         repo_name: "{{ item.key }}"
+        nms_prometheus_template: "nms-custom-prom.yml.j2"
+        nms_promtail_template: "nms-custom-lokiurl.yml.j2"
       when:
         - repos is defined
         - repos | length > 0

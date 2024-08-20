@@ -1,0 +1,47 @@
+---
+- name: Gather OS facts
+  ansible.builtin.setup:
+
+- name: Fail if the OS is not Ubuntu or Debian
+  ansible.builtin.fail:
+    msg: "This playbook only supports Ubuntu or Debian."
+  when: ansible_distribution not in ['Ubuntu', 'Debian']
+
+- name: Identify OS and set package URL
+  set_fact:
+    falcon_package_url: "{{ falcon_url_ubuntu if ansible_distribution == 'Ubuntu' else falcon_url_debian }}"
+  when: ansible_distribution in ['Ubuntu', 'Debian']
+
+- name: Download the package using get_url
+  ansible.builtin.get_url:
+    url: "{{ falcon_package_url }}"
+    dest: /tmp/falcon.deb
+
+- name: Install the package using dpkg
+  ansible.builtin.command:
+    cmd: dpkg -i /tmp/falcon.deb
+  become: yes
+
+- name: Run the falconctl command
+  ansible.builtin.command:
+    cmd: /opt/CrowdStrike/falconctl -s --cid={{ falcon_cid }}
+  become: yes
+
+- name: Start the falcon-sensor service
+  ansible.builtin.systemd:
+    name: falcon-sensor
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Verify falcon-sensor service is running
+  ansible.builtin.systemd:
+    name: falcon-sensor
+    state: started
+  register: falcon_service_status
+
+- name: Fail if falcon-sensor service did not start successfully
+  ansible.builtin.fail:
+    msg: "falcon-sensor service failed to start"
+  when: falcon_service_status.status['ActiveState'] != 'active'
+

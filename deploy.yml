@@ -20,6 +20,7 @@
     - role: base/diskspace-crontab
       tags:
         - diskspace-crontab
+    - base/crowdstrike
     - base/performance
 
   tasks:

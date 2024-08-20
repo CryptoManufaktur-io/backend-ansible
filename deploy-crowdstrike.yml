@@ -1,0 +1,7 @@
+---
+- name: Install CrowdStrike Falcon
+  hosts: all
+  serial: 1
+  gather_facts: false
+  roles:
+    - base/crowdstrike

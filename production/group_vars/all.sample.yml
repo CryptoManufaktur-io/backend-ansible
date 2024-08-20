@@ -9,8 +9,14 @@ nms_metrics_url: URL
 nms_logs_url: URL
 nms_username: USERNAME
 nms_password: PASSWORD
-nms_operator: CryptoManufaktur
+nms_operator: NO-Name
 
+# Crowdstrike
+falcon_url_ubuntu: "https://fqdn-for/falcon-sensor-ubuntu-x86_64.deb"
+falcon_url_debian: "https://fqdn-for/falcon-sensor-debian-amd64.deb"
+falcon_cid: "my-cid"
+
+# Unattended Upgrades
 upgrades_UU_CONF: /etc/apt/apt.conf.d/50unattended-upgrades
 upgrades_UU_START: /etc/apt/apt.conf.d/20auto-upgrades
 upgrades_EMAIL_TO: user@example.com

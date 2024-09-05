@@ -40,15 +40,40 @@ If you want to check what hosts have been selected by the filter, you can add th
 ansible-playbook -i production/inventory.yml --limit=mytarget.example.com --list-hosts deploy.yml
 ```
 
-### NMS
-To send metrics to NMS, a config is added to prometheus and loki. Check on `roles/base/custom_prometheus_loki` for the implementation and templates of config updates.
+### Extra URLS to send metrics and logs
+To send metrics/logs to other endpoints apart from our local loki/mimir stack, new URLs are added to prometheus and loki `custom-*.yml` files. Check on `roles/base/custom_prometheus_loki` for the implementation and templates of config updates.
 
 This can be used to send metrics and logs to any other server as needed by changing the URLs in `all.yml` specifically below
 
 ```yml
-nms_metrics_url:  URL
-nms_logs_url:     URL
-nms_username:     USERNAME
-nms_password:     PASSWORD
-nms_operator:     CryptoManufaktur
+extra_send_metrics_logs:
+  sending_to_1:
+    servers_hostnames: ["all"]
+    metrics:
+      url: https://METRICS_URL_1111
+      username: METRICS_USERNAME_1111
+      password: METRICS_PASSWORD_1111
+    logs:
+      url: https://LOGS_URL_1111
+      username: LOGS_USERNAME_1111
+      password: LOGS_PASSWORD_1111
+      operator: LOGS_OPERATOR_1111
+  sending_to_2:
+    servers_hostnames: ["server1", "server2"]
+    metrics:
+      url: https://METRICS_URL_2222
+      username: METRICS_USERNAME_2222
+      password: METRICS_PASSWORD_2222
+    logs:
+      url: https://LOGS_URL_2222
+      username: LOGS_USERNAME_2222
+      password: LOGS_PASSWORD_2222
+      operator: LOGS_OPERATOR_2222
+  sending_to_3:
+    servers_hostnames: ["all"]
+    logs:
+      url: https://LOGS_URL_3333
+      username: LOGS_USERNAME_3333
+      password: LOGS_PASSWORD_3333
+      operator: LOGS_OPERATOR_3333
 ```

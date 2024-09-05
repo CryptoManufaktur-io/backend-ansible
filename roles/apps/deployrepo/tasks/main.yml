@@ -58,8 +58,8 @@
   vars:
     prometheus_template: "../../base/custom_prometheus_loki/templates/custom-prom.yml.j2"
     promtail_template: "../../base/custom_prometheus_loki/templates/custom-lokiurl.yml.j2"
-    nms_prometheus_template: "../../base/custom_prometheus_loki/templates/nms-custom-prom.yml.j2"
-    nms_promtail_template: "../../base/custom_prometheus_loki/templates/nms-custom-lokiurl.yml.j2"
+    extra_prometheus_template: "../../base/custom_prometheus_loki/templates/extra-custom-prom.yml.j2"
+    extra_promtail_template: "../../base/custom_prometheus_loki/templates/extra-custom-lokiurl.yml.j2"
 
 - name: start node
   ansible.builtin.shell: ./ethd up

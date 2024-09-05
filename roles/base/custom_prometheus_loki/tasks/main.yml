@@ -11,12 +11,19 @@
     dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
   when: promtail_template is defined and item.value.deploy_promtail is defined and item.value.deploy_promtail == true
 
-- name: Update custom-prom.yml file with NMS block
+- name: Update custom-prom.yml file with extra blocks
+  when: item.value.prom_cluster is defined and extra_send.value.metrics is defined and (extra_send.value.servers_hostnames[0] == 'all' or inventory_hostname in extra_send.value.servers_hostnames)
   blockinfile:
     dest: ~/{{ item.value.clone_dir }}/prometheus/custom-prom.yml
-    block: "{{ lookup('template', nms_prometheus_template) }}"
-    marker: "  ##<!-- {mark} NMS Block -->"
-  when: nms_prometheus_template is defined and item.value.prom_cluster is defined
+    block: "{{ lookup('template', extra_prometheus_template) }}"
+    marker: "\n  ##<!-- {mark} {{ extra_send.key }} Block -->"
+  loop: "{{ extra_send_metrics_logs | dict2items }}"
+  loop_control:
+    loop_var: extra_send
+  vars:
+    extra_url: "{{ extra_send.value.metrics.url }}"
+    extra_username: "{{ extra_send.value.metrics.username }}"
+    extra_password: "{{ extra_send.value.metrics.password }}"
   register: prometheus_config_changed
 
 - name: Restart prometheus when config changed
@@ -25,12 +32,20 @@
     ./ethd restart prometheus
   when: prometheus_config_changed.changed == true
 
-- name: Update custom-lokiurl.yml file with NMS block
+- name: Update custom-lokiurl.yml file with extra blocks
+  when: item.value.deploy_promtail is defined and item.value.deploy_promtail == true and extra_send.value.logs is defined and (extra_send.value.servers_hostnames[0] == 'all' or inventory_hostname in extra_send.value.servers_hostnames)
   blockinfile:
     dest: ~/{{ item.value.clone_dir }}/promtail/custom-lokiurl.yml
-    block: "{{ lookup('template', nms_promtail_template) }}"
-    marker: "##<!-- {mark} NMS Block -->"
-  when: nms_promtail_template is defined and item.value.deploy_promtail is defined and item.value.deploy_promtail == true
+    block: "{{ lookup('template', extra_promtail_template) }}"
+    marker: "\n##<!-- {mark} {{ extra_send.key }} Block -->"
+  loop: "{{ extra_send_metrics_logs | dict2items }}"
+  loop_control:
+    loop_var: extra_send
+  vars:
+    extra_url: "{{ extra_send.value.logs.url }}"
+    extra_username: "{{ extra_send.value.logs.username }}"
+    extra_password: "{{ extra_send.value.logs.password }}"
+    extra_operator: "{{ extra_send.value.logs.operator }}"
   register: promtail_config_changed
 
 - name: Restart promtail when config changed

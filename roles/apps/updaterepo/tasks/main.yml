@@ -9,14 +9,6 @@
     loop_var: env_var
   when: item.value.env_variables is defined
 
-- name: Add tasks for custom-prom.yml and custom-lokiurl.yml
-  include_tasks: "../../base/custom_prometheus_loki/tasks/main.yml"
-  vars:
-    prometheus_template: "../../base/custom_prometheus_loki/templates/custom-prom.yml.j2"
-    promtail_template: "../../base/custom_prometheus_loki/templates/custom-lokiurl.yml.j2"
-    nms_prometheus_template: "../../base/custom_prometheus_loki/templates/nms-custom-prom.yml.j2"
-    nms_promtail_template: "../../base/custom_prometheus_loki/templates/nms-custom-lokiurl.yml.j2"
-
 - name: update node software
   ansible.builtin.shell: ./ethd update
   args:
@@ -27,6 +19,14 @@
 - name: Result of ./ethd update
   debug:
     var: update_output.stdout_lines
+
+- name: Add tasks for custom-prom.yml and custom-lokiurl.yml
+  include_tasks: "../../base/custom_prometheus_loki/tasks/main.yml"
+  vars:
+    prometheus_template: "../../base/custom_prometheus_loki/templates/custom-prom.yml.j2"
+    promtail_template: "../../base/custom_prometheus_loki/templates/custom-lokiurl.yml.j2"
+    nms_prometheus_template: "../../base/custom_prometheus_loki/templates/nms-custom-prom.yml.j2"
+    nms_promtail_template: "../../base/custom_prometheus_loki/templates/nms-custom-lokiurl.yml.j2"
 
 - name: restart changed software
   ansible.builtin.shell: ./ethd up
@@ -39,9 +39,23 @@
   debug:
     var: up_output.stderr_lines
 
+- name: Read the .env file
+  slurp:
+    src: "~/{{ item.value.clone_dir }}/.env"
+  register: env_file_content
+
+- name: Decode the file content
+  set_fact:
+    env_file_text: "{{ env_file_content['content'] | b64decode }}"
+
+- name: Extract COMPOSE_FILE line
+  set_fact:
+    compose_file_line: "{{ env_file_text | regex_search('^COMPOSE_FILE=.*$', multiline=True) }}"
+
 - name: Wait for the Docker container to stabilize
   pause:
-    seconds: 30
+    seconds: "{{ '60' if 'ssv.yml' in compose_file_line else '30' }}"
+  when: compose_file_line is defined
 
 - name: Get execution container info
   docker_container_info:

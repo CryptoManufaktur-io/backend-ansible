@@ -5,11 +5,36 @@ loki_url: https://loki.example.com/loki/api/v1/push
 prom_cf_id: cloudflare-zerotrust-token.access
 prom_cf_secret: cloudflare-zerotrust-secret
 
-nms_metrics_url: URL
-nms_logs_url: URL
-nms_username: USERNAME
-nms_password: PASSWORD
-nms_operator: NO-Name
+extra_send_metrics_logs:
+  sending_to_1:
+    servers_hostnames: ["all"]
+    metrics:
+      url: https://METRICS_URL_1111
+      username: METRICS_USERNAME_1111
+      password: METRICS_PASSWORD_1111
+    logs:
+      url: https://LOGS_URL_1111
+      username: LOGS_USERNAME_1111
+      password: LOGS_PASSWORD_1111
+      operator: LOGS_OPERATOR_1111
+  sending_to_2:
+    servers_hostnames: ["server1", "server2"]
+    metrics:
+      url: https://METRICS_URL_2222
+      username: METRICS_USERNAME_2222
+      password: METRICS_PASSWORD_2222
+    logs:
+      url: https://LOGS_URL_2222
+      username: LOGS_USERNAME_2222
+      password: LOGS_PASSWORD_2222
+      operator: LOGS_OPERATOR_2222
+  sending_to_3:
+    servers_hostnames: ["all"]
+    logs:
+      url: https://LOGS_URL_3333
+      username: LOGS_USERNAME_3333
+      password: LOGS_PASSWORD_3333
+      operator: LOGS_OPERATOR_3333
 
 # Crowdstrike
 falcon_url_ubuntu: "https://fqdn-for/falcon-sensor-ubuntu-x86_64.deb"

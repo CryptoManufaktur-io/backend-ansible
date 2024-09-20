@@ -1,5 +1,5 @@
 ---
-- name: Add NMS prometheus and promtail endpoints
+- name: Add extra prometheus and promtail endpoints
   hosts: all
   gather_facts: false
   strategy: free
@@ -18,8 +18,10 @@
         loop_var: item
       vars:
         repo_name: "{{ item.key }}"
-        nms_prometheus_template: "nms-custom-prom.yml.j2"
-        nms_promtail_template: "nms-custom-lokiurl.yml.j2"
+        prometheus_template: "custom-prom.yml.j2"
+        promtail_template: "custom-lokiurl.yml.j2"
+        extra_prometheus_template: "extra-custom-prom.yml.j2"
+        extra_promtail_template: "extra-custom-lokiurl.yml.j2"
       when:
         - repos is defined
         - repos | length > 0

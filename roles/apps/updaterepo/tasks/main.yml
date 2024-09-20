@@ -41,7 +41,7 @@
 
 - name: Check whether a container was restarted
   set_fact:
-    started_present: "{{ 'started' in (update_output.stdout_lines | join(' ') | lower) }}"
+    started_present: "{{ 'started' in (up_output.stderr_lines | join(' ') | lower) }}"
 
 - name: Read the .env file
   slurp:

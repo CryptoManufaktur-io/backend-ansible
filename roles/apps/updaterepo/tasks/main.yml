@@ -39,23 +39,32 @@
   debug:
     var: up_output.stderr_lines
 
+- name: Check whether a container was restarted
+  set_fact:
+    started_present: "{{ 'started' in (update_output.stdout_lines | join(' ') | lower) }}"
+
 - name: Read the .env file
   slurp:
     src: "~/{{ item.value.clone_dir }}/.env"
   register: env_file_content
+  when: started_present
 
 - name: Decode the file content
   set_fact:
     env_file_text: "{{ env_file_content['content'] | b64decode }}"
+  when: started_present
 
 - name: Extract COMPOSE_FILE line
   set_fact:
     compose_file_line: "{{ env_file_text | regex_search('^COMPOSE_FILE=.*$', multiline=True) }}"
+  when: started_present
 
 - name: Wait for the Docker container to stabilize
   pause:
-    seconds: "{{ '60' if 'ssv.yml' in compose_file_line else '30' }}"
-  when: compose_file_line is defined
+    seconds: "{{ '90' if 'ssv.yml' in compose_file_line else '30' }}"
+  when:
+    - started_present
+    - compose_file_line is defined
 
 - name: Get execution container info
   docker_container_info:

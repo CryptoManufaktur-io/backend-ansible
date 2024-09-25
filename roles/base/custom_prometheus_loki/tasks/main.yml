@@ -45,7 +45,8 @@
     extra_url: "{{ extra_send.value.logs.url }}"
     extra_username: "{{ extra_send.value.logs.username }}"
     extra_password: "{{ extra_send.value.logs.password }}"
-    extra_operator: "{{ extra_send.value.logs.operator }}"
+    extra_operator: "{{ extra_send.value.logs.operator | default('') }}"
+    extra_tenant: "{{ extra_send.value.logs.tenant | default('') }}"
   register: promtail_config_changed
 
 - name: Restart promtail when config changed

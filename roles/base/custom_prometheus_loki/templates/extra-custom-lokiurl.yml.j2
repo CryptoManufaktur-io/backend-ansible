@@ -2,5 +2,10 @@
   basic_auth:
     username: {{ extra_username }}
     password: {{ extra_password }}
+{% if extra_tenant %}
+  tenant_id: {{ extra_tenant }}
+{% endif %}
+{% if extra_operator %}
   external_labels:
     operator: {{ extra_operator }}
+{% endif %}

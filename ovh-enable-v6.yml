@@ -1,0 +1,51 @@
+---
+- name: Enable IPv6 using OVH Utils
+  hosts: all
+  serial: 1
+  gather_facts: no
+  tasks:
+    - name: Check if OVH API keys are defined
+      fail:
+        msg: "OVH API keys (ovh_app_key, ovh_app_secret, ovh_consumer_key) must be defined."
+      when: ovh_app_key is not defined or ovh_app_secret is not defined or ovh_consumer_key is not defined
+
+    - name: Set environment variables for the playbook run
+      ansible.builtin.set_fact:
+        env_vars:
+          OVH_APP_KEY: "{{ ovh_app_key }}"
+          OVH_APP_SECRET: "{{ ovh_app_secret }}"
+          OVH_CONSUMER_KEY: "{{ ovh_consumer_key }}"
+
+    - name: Download the executable
+      ansible.builtin.get_url:
+        url: https://github.com/CryptoManufaktur-io/ovh-utils/releases/download/v0.0.1/enable-v6-v0.0.1-linux-amd64.tar.gz
+        dest: /tmp/enable-v6-v0.0.1-linux-amd64.tar.gz
+
+    - name: Extract the tar file
+      ansible.builtin.unarchive:
+        src: /tmp/enable-v6-v0.0.1-linux-amd64.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Make the executable executable
+      ansible.builtin.file:
+        path: /tmp/enable-v6-v0.0.1-linux-amd64/enable-v6
+        mode: '0755'
+
+    - name: Execute the enable-v6 command
+      ansible.builtin.command: /tmp/enable-v6-v0.0.1-linux-amd64/enable-v6
+      environment: "{{ env_vars }}"
+      register: command_result
+
+    - name: Print the stdout of the command
+      debug:
+        msg: "{{ command_result.stdout }}"
+
+    - name: Remove the extracted directory and tar file
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/enable-v6-v0.0.1-linux-amd64
+        - /tmp/enable-v6-v0.0.1-linux-amd64.tar.gz
+
